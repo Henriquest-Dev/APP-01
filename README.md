@@ -64,6 +64,16 @@ npm run build:aab
 # resultado: android/app/build/outputs/bundle/release/app-release.aab
 ```
 
+### APK de teste (instalar direto no telemóvel)
+
+```bash
+npm run build:apk
+# resultado: android/app/build/outputs/apk/release/app-release.apk (arm64, ~28 MB)
+```
+
+Usa as mesmas variáveis `CALLOUT_UPLOAD_*`. Desinstala o APK de teste antes de instalar a versão da Play Store
+(as assinaturas são diferentes por causa do Play App Signing).
+
 ### Antes de cada nova versão
 
 Aumenta `expo.android.versionCode` (1 → 2 → 3…) e `expo.version` no `app.json`. A Play Store rejeita um
