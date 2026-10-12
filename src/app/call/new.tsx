@@ -1,22 +1,18 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Haptics from 'expo-haptics';
 import { router, useLocalSearchParams } from 'expo-router';
+import { Check, TrendingDown, TrendingUp, X } from 'lucide-react-native';
 import { useState } from 'react';
-import {
-  FlatList,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  StyleSheet,
-  TextInput,
-  View,
-} from 'react-native';
+import { FlatList, KeyboardAvoidingView, Platform, StyleSheet, TextInput, View } from 'react-native';
+import Animated, { FadeInDown, useAnimatedStyle, withTiming } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Chips } from '@/components/chips';
 import { CoinAvatar } from '@/components/coin-avatar';
 import { Disclaimer } from '@/components/disclaimer';
+import { Glass } from '@/components/glass';
 import { IconButton } from '@/components/icon-button';
+import { PressableScale } from '@/components/pressable-scale';
 import { Screen } from '@/components/screen';
+import { Segmented } from '@/components/segmented';
 import { Txt } from '@/components/text';
 import { strings } from '@/i18n';
 import { formatPercent, formatPrice } from '@/lib/format';
@@ -24,10 +20,11 @@ import { isStablecoin } from '@/lib/momentum';
 import type { Direction, Timeframe } from '@/lib/types';
 import { useCalls } from '@/state/calls';
 import { useMarket } from '@/state/market';
-import { colors, fonts, radius, space } from '@/theme';
+import { colors, fonts, motion, radius, space } from '@/theme';
 
 export default function NewCall() {
   const params = useLocalSearchParams<{ coin?: string; direction?: Direction }>();
+  const insets = useSafeAreaInsets();
   const coins = useMarket().coins.filter((c) => !isStablecoin(c) || c.id === params.coin);
   const { addCall } = useCalls();
 
@@ -60,22 +57,37 @@ export default function NewCall() {
     router.dismissTo('/profile');
   };
 
-  const pickable =
-    coin && !coins.slice(0, 15).some((c) => c.id === coin.id)
-      ? [coin, ...coins.slice(0, 15)]
-      : coins.slice(0, 15);
+  const top = coins.slice(0, 15);
+  const pickable = coin && !top.some((c) => c.id === coin.id) ? [coin, ...top] : top;
+
+  const footer = (
+    <View style={[styles.footer, { paddingBottom: insets.bottom + space.md }]}>
+      <PressableScale
+        accessibilityRole="button"
+        disabled={!canSubmit}
+        onPress={submit}
+        style={[styles.submit, !canSubmit && { opacity: 0.4 }]}>
+        <Check size={20} color={colors.accentInk} strokeWidth={2.4} />
+        <Txt size={16} weight="semibold" color={colors.accentInk}>
+          {strings.makeCall}
+        </Txt>
+      </PressableScale>
+    </View>
+  );
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <Screen
         withTabBar={false}
         keyboardShouldPersistTaps="handled"
+        footer={footer}
+        contentContainerStyle={{ paddingBottom: 110 + insets.bottom }}
         header={
           <View style={styles.header}>
-            <Txt size={24} weight="semibold">
+            <Txt size={22} weight="semibold">
               {strings.newCall}
             </Txt>
-            <IconButton icon="close" label="Close" onPress={() => router.back()} />
+            <IconButton icon={X} label="Close" onPress={() => router.back()} />
           </View>
         }>
         <Label text={strings.pickCoin} />
@@ -85,38 +97,38 @@ export default function NewCall() {
           keyExtractor={(c) => c.id}
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ gap: space.sm, paddingHorizontal: space.lg }}
-          renderItem={({ item }) => {
-            const active = item.id === coinId;
-            return (
-              <Pressable
+          renderItem={({ item, index }) => (
+            <Animated.View entering={FadeInDown.delay(index * 30).duration(motion.base)}>
+              <CoinChip
+                selected={item.id === coinId}
+                symbol={item.symbol}
+                image={item.image}
                 onPress={() => setPicked(item.id)}
-                style={[
-                  styles.coin,
-                  active && { borderColor: colors.accent, backgroundColor: colors.accentSoft },
-                ]}>
-                <CoinAvatar uri={item.image} symbol={item.symbol} size={32} />
-                <Txt size={13} weight="semibold">
-                  {item.symbol}
-                </Txt>
-              </Pressable>
-            );
-          }}
+              />
+            </Animated.View>
+          )}
         />
+
         {coin ? (
-          <Txt size={13} color={colors.textMuted} style={styles.hint}>
-            {strings.current}: {formatPrice(coin.price)}
-          </Txt>
+          <Glass style={styles.current}>
+            <Txt size={13} color={colors.textMuted}>
+              {strings.current}
+            </Txt>
+            <Txt size={15} weight="semibold" numeric>
+              {formatPrice(coin.price)}
+            </Txt>
+          </Glass>
         ) : null}
 
         <Label text={strings.direction} />
         <View style={styles.dirRow}>
-          <DirectionButton active={direction === 'up'} up onPress={() => setDirection('up')} />
-          <DirectionButton active={direction === 'down'} up={false} onPress={() => setDirection('down')} />
+          <DirectionCard up active={direction === 'up'} onPress={() => setDirection('up')} />
+          <DirectionCard up={false} active={direction === 'down'} onPress={() => setDirection('down')} />
         </View>
 
         <Label text={strings.targetPrice} />
-        <View style={styles.inputWrap}>
-          <Txt size={22} weight="semibold" color={colors.textMuted}>
+        <View style={[styles.inputWrap, targetMismatch && { borderColor: colors.down }]}>
+          <Txt size={22} weight="semibold" color={colors.textFaint}>
             $
           </Txt>
           <TextInput
@@ -125,19 +137,24 @@ export default function NewCall() {
             keyboardType="decimal-pad"
             placeholder={coin ? String(coin.price) : '0.00'}
             placeholderTextColor={colors.textFaint}
+            selectionColor={colors.accent}
             style={styles.input}
           />
           {coin && hasTarget ? (
-            <Txt size={14} weight="semibold" color={targetMismatch ? colors.down : colors.accent}>
+            <Txt size={13} weight="semibold" color={targetMismatch ? colors.down : colors.up} numeric>
               {formatPercent(((targetValue - coin.price) / coin.price) * 100)}
             </Txt>
           ) : null}
         </View>
+        {targetMismatch ? (
+          <Txt size={12} color={colors.down} style={styles.hint}>
+            {direction === 'up' ? strings.targetAbove : strings.targetBelow}
+          </Txt>
+        ) : null}
 
         <Label text={strings.timeframe} />
-        <View style={styles.tfRow}>
-          <Chips<Timeframe>
-            scroll={false}
+        <View style={{ paddingHorizontal: space.lg }}>
+          <Segmented<Timeframe>
             value={timeframe}
             onChange={setTimeframe}
             options={[
@@ -148,17 +165,6 @@ export default function NewCall() {
           />
         </View>
 
-        <Pressable
-          accessibilityRole="button"
-          disabled={!canSubmit}
-          onPress={submit}
-          style={({ pressed }) => [styles.submit, (!canSubmit || pressed) && { opacity: 0.5 }]}>
-          <Ionicons name="megaphone" size={20} color={colors.accentInk} />
-          <Txt size={17} weight="semibold" color={colors.accentInk}>
-            {strings.makeCall}
-          </Txt>
-        </Pressable>
-
         <Disclaimer />
       </Screen>
     </KeyboardAvoidingView>
@@ -167,32 +173,67 @@ export default function NewCall() {
 
 function Label({ text }: { text: string }) {
   return (
-    <Txt size={14} weight="medium" color={colors.textMuted} style={styles.label}>
+    <Txt size={13} weight="medium" color={colors.textMuted} style={styles.label}>
       {text}
     </Txt>
   );
 }
 
-function DirectionButton({ active, up, onPress }: { active: boolean; up: boolean; onPress: () => void }) {
-  const tint = up ? colors.up : colors.down;
+function CoinChip({
+  selected,
+  symbol,
+  image,
+  onPress,
+}: {
+  selected: boolean;
+  symbol: string;
+  image: string;
+  onPress: () => void;
+}) {
+  const ring = useAnimatedStyle(() => ({
+    borderColor: withTiming(selected ? colors.accent : colors.border, { duration: motion.fast }),
+    backgroundColor: withTiming(selected ? colors.accentSoft : colors.surface, { duration: motion.fast }),
+  }));
   return (
-    <Pressable
+    <PressableScale
+      accessibilityRole="button"
+      accessibilityState={{ selected }}
+      onPress={onPress}
+      scaleTo={0.92}>
+      <Animated.View style={[styles.coin, ring]}>
+        <CoinAvatar uri={image} symbol={symbol} size={30} />
+        <Txt size={12} weight="semibold">
+          {symbol}
+        </Txt>
+      </Animated.View>
+    </PressableScale>
+  );
+}
+
+function DirectionCard({ up, active, onPress }: { up: boolean; active: boolean; onPress: () => void }) {
+  const tint = up ? colors.up : colors.down;
+  const Icon = up ? TrendingUp : TrendingDown;
+  const card = useAnimatedStyle(() => ({
+    borderColor: withTiming(active ? tint : colors.border, { duration: motion.fast }),
+    backgroundColor: withTiming(active ? (up ? colors.upSoft : colors.downSoft) : colors.surface, {
+      duration: motion.fast,
+    }),
+  }));
+  return (
+    <PressableScale
       accessibilityRole="button"
       accessibilityState={{ selected: active }}
       onPress={onPress}
-      style={[
-        styles.dir,
-        active && { borderColor: tint, backgroundColor: up ? colors.accentSoft : colors.downSoft },
-      ]}>
-      <Ionicons
-        name={up ? 'trending-up' : 'trending-down'}
-        size={26}
-        color={active ? tint : colors.textMuted}
-      />
-      <Txt size={16} weight="semibold" color={active ? tint : colors.textMuted}>
-        {up ? strings.willGoUp : strings.willGoDown}
-      </Txt>
-    </Pressable>
+      style={{ flex: 1 }}>
+      <Animated.View style={[styles.dir, card]}>
+        <View style={[styles.dirIcon, { backgroundColor: active ? tint : colors.surfaceRaised }]}>
+          <Icon size={20} color={active ? colors.bg : colors.textMuted} strokeWidth={2.2} />
+        </View>
+        <Txt size={15} weight="semibold" color={active ? colors.text : colors.textMuted}>
+          {up ? strings.willGoUp : strings.willGoDown}
+        </Txt>
+      </Animated.View>
+    </PressableScale>
   );
 }
 
@@ -209,24 +250,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
     paddingVertical: space.md,
-    width: 72,
+    width: 68,
     borderRadius: radius.md,
-    borderWidth: 1.5,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    borderWidth: 1,
+  },
+  current: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginHorizontal: space.lg,
+    marginTop: space.md,
+    paddingHorizontal: space.lg,
+    paddingVertical: space.md,
+    borderRadius: radius.md,
   },
   dirRow: { flexDirection: 'row', gap: space.md, paddingHorizontal: space.lg },
   dir: {
-    flex: 1,
-    height: 96,
-    borderRadius: radius.md,
-    borderWidth: 1.5,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    height: 110,
+    borderRadius: radius.lg,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
+    gap: 10,
   },
+  dirIcon: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   inputWrap: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -240,13 +286,21 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   input: { flex: 1, color: colors.text, fontFamily: fonts.semibold, fontSize: 22 },
-  tfRow: { flexDirection: 'row', gap: space.sm, paddingHorizontal: space.lg },
+  footer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingHorizontal: space.lg,
+    paddingTop: space.md,
+    backgroundColor: 'rgba(11, 12, 20, 0.92)',
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
   submit: {
     flexDirection: 'row',
     gap: space.sm,
-    marginHorizontal: space.lg,
-    marginTop: space.xxl,
-    height: 60,
+    height: 54,
     borderRadius: radius.pill,
     backgroundColor: colors.accent,
     alignItems: 'center',

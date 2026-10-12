@@ -1,34 +1,30 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
-import type { ComponentProps } from 'react';
-import { Pressable, StyleSheet } from 'react-native';
+import type { LucideIcon } from 'lucide-react-native';
+import { StyleSheet } from 'react-native';
 
 import { colors } from '@/theme';
+import { PressableScale } from './pressable-scale';
 
-type Props = {
-  icon: ComponentProps<typeof Ionicons>['name'];
-  onPress?: () => void;
-  label: string;
-};
+type Props = { icon: LucideIcon; onPress?: () => void; label: string; size?: number };
 
-export function IconButton({ icon, onPress, label }: Props) {
+export function IconButton({ icon: Icon, onPress, label, size = 42 }: Props) {
   return (
-    <Pressable
+    <PressableScale
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={onPress}
       hitSlop={8}
-      style={({ pressed }) => [styles.btn, pressed && { opacity: 0.7 }]}>
-      <Ionicons name={icon} size={20} color={colors.text} />
-    </Pressable>
+      scaleTo={0.9}
+      style={[styles.btn, { width: size, height: size, borderRadius: size / 2 }]}>
+      <Icon size={19} color={colors.text} strokeWidth={1.8} />
+    </PressableScale>
   );
 }
 
 const styles = StyleSheet.create({
   btn: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
     backgroundColor: colors.surfaceRaised,
+    borderWidth: 1,
+    borderColor: colors.border,
     alignItems: 'center',
     justifyContent: 'center',
   },

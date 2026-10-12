@@ -1,19 +1,36 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { ArrowDownRight, ArrowUpRight } from 'lucide-react-native';
 import { StyleSheet, View } from 'react-native';
 
 import { formatPercent } from '@/lib/format';
 import { colors, radius } from '@/theme';
 import { Txt } from './text';
 
-export function ChangePill({ value, solid = false }: { value: number; solid?: boolean }) {
+/** "↗ 2.02%" in mint or rose; `plain` drops the background like the list rows in the reference. */
+export function ChangePill({
+  value,
+  plain = false,
+  size = 13,
+}: {
+  value: number;
+  plain?: boolean;
+  size?: number;
+}) {
   const up = value >= 0;
-  const fg = solid ? colors.accentInk : up ? colors.up : colors.down;
-  const bg = solid ? (up ? colors.up : colors.down) : up ? colors.accentSoft : colors.downSoft;
+  const color = up ? colors.up : colors.down;
+  const Arrow = up ? ArrowUpRight : ArrowDownRight;
   return (
-    <View style={[styles.pill, { backgroundColor: bg }]}>
-      <Ionicons name={up ? 'arrow-up' : 'arrow-down'} size={12} color={fg} />
-      <Txt size={13} weight="semibold" color={fg}>
-        {formatPercent(value)}
+    <View
+      style={[
+        styles.pill,
+        !plain && {
+          backgroundColor: up ? colors.upSoft : colors.downSoft,
+          paddingHorizontal: 8,
+          paddingVertical: 3,
+        },
+      ]}>
+      <Arrow size={size} color={color} strokeWidth={2.2} />
+      <Txt size={size} weight="medium" color={color} numeric>
+        {formatPercent(Math.abs(value)).replace('+', '')}
       </Txt>
     </View>
   );
@@ -23,9 +40,7 @@ const styles = StyleSheet.create({
   pill: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 3,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    gap: 2,
     borderRadius: radius.pill,
     alignSelf: 'flex-start',
   },

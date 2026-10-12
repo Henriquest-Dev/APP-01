@@ -1,10 +1,10 @@
 import {
-  Outfit_400Regular,
-  Outfit_500Medium,
-  Outfit_600SemiBold,
-  Outfit_700Bold,
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
   useFonts,
-} from '@expo-google-fonts/outfit';
+} from '@expo-google-fonts/inter';
 import { DarkTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -23,10 +23,10 @@ const theme = {
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
-    Outfit_400Regular,
-    Outfit_500Medium,
-    Outfit_600SemiBold,
-    Outfit_700Bold,
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
   });
 
   useEffect(() => {
@@ -40,12 +40,23 @@ export default function RootLayout() {
       <StatusBar style="light" />
       <MarketProvider>
         <CallsProvider>
-          <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }}>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: colors.bg },
+              animation: 'ios_from_right',
+              animationDuration: 320,
+              gestureEnabled: true,
+            }}>
             <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="coin/[id]" options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="coin/[id]" />
             <Stack.Screen
               name="call/new"
-              options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
+              options={{
+                presentation: 'modal',
+                animation: 'slide_from_bottom',
+                gestureDirection: 'vertical',
+              }}
             />
           </Stack>
         </CallsProvider>

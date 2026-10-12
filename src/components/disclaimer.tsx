@@ -1,4 +1,4 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Info } from 'lucide-react-native';
 import { StyleSheet, View } from 'react-native';
 
 import { strings } from '@/i18n';
@@ -8,7 +8,7 @@ import { Txt } from './text';
 export function Disclaimer() {
   return (
     <View style={styles.row}>
-      <Ionicons name="information-circle-outline" size={16} color={colors.textFaint} />
+      <Info size={14} color={colors.textFaint} strokeWidth={1.8} style={{ marginTop: 2 }} />
       <Txt size={12} color={colors.textFaint} style={{ flex: 1 }}>
         {strings.disclaimer}
       </Txt>

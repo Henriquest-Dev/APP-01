@@ -1,17 +1,33 @@
 import { router, useLocalSearchParams } from 'expo-router';
+import {
+  Activity,
+  Bookmark,
+  ChevronLeft,
+  CircleDollarSign,
+  Gauge,
+  MoveHorizontal,
+  TrendingDown,
+  TrendingUp,
+  Users,
+  type LucideIcon,
+} from 'lucide-react-native';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AreaChart } from '@/components/area-chart';
 import { ChangePill } from '@/components/change-pill';
-import { Chips } from '@/components/chips';
 import { CoinAvatar } from '@/components/coin-avatar';
 import { ConsensusBar } from '@/components/consensus-bar';
 import { Disclaimer } from '@/components/disclaimer';
+import { Glass } from '@/components/glass';
 import { IconButton } from '@/components/icon-button';
 import { MomentumMeter, momentumColor } from '@/components/momentum-meter';
+import { PressableScale } from '@/components/pressable-scale';
 import { Price } from '@/components/price';
 import { Screen } from '@/components/screen';
+import { Segmented } from '@/components/segmented';
 import { Txt } from '@/components/text';
 import { strings } from '@/i18n';
 import { fetchChart, fetchCoin, type ChartRange } from '@/lib/api';
@@ -20,10 +36,11 @@ import { formatCompact, formatPrice } from '@/lib/format';
 import { isStablecoin, momentumScore } from '@/lib/momentum';
 import type { Coin } from '@/lib/types';
 import { useCoin } from '@/state/market';
-import { colors, radius, space } from '@/theme';
+import { colors, motion, radius, space } from '@/theme';
 
 export default function CoinScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const insets = useSafeAreaInsets();
   const cached = useCoin(id);
   const [fetched, setFetched] = useState<Coin>();
   const coin = cached ?? fetched;
@@ -52,11 +69,16 @@ export default function CoinScreen() {
 
   const header = (
     <View style={styles.header}>
-      <IconButton icon="chevron-back" label="Back" onPress={() => router.back()} />
-      <Txt size={18} weight="semibold">
-        {coin?.name ?? ''}
-      </Txt>
-      <IconButton icon="bookmark-outline" label="Watchlist" />
+      <IconButton icon={ChevronLeft} label="Back" onPress={() => router.back()} />
+      {coin ? (
+        <View style={styles.headerTitle}>
+          <CoinAvatar uri={coin.image} symbol={coin.symbol} size={22} />
+          <Txt size={16} weight="semibold">
+            {coin.name}
+          </Txt>
+        </View>
+      ) : null}
+      <IconButton icon={Bookmark} label="Watchlist" />
     </View>
   );
 
@@ -72,64 +94,79 @@ export default function CoinScreen() {
   const rising = series.length > 1 ? series[series.length - 1] >= series[0] : coin.change24h >= 0;
   const consensus = demoConsensus(coin.id);
   const score = momentumScore(coin);
+  const dayRange =
+    coin.high24h > coin.low24h ? (coin.price - coin.low24h) / (coin.high24h - coin.low24h) : 0.5;
+
+  const footer = (
+    <View style={[styles.footer, { paddingBottom: insets.bottom + space.md }]}>
+      <CallButton direction="down" coinId={coin.id} />
+      <CallButton direction="up" coinId={coin.id} />
+    </View>
+  );
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Screen withTabBar={false} header={header} contentContainerStyle={{ paddingBottom: 130 }}>
-        <View style={styles.pad}>
-          <View style={styles.row}>
-            <CoinAvatar uri={coin.image} symbol={coin.symbol} size={26} />
-            <Txt size={15} color={colors.textMuted}>
-              {coin.symbol} · {strings.price}
-            </Txt>
-          </View>
-          <Price value={coin.price} size={40} />
-          <ChangePill value={coin.change24h} />
-        </View>
+    <Screen
+      withTabBar={false}
+      header={header}
+      footer={footer}
+      contentContainerStyle={{ paddingBottom: 120 + insets.bottom }}>
+      <Animated.View entering={FadeInDown.duration(motion.base)} style={styles.pad}>
+        <Txt size={13} color={colors.textMuted}>
+          {coin.symbol} · {strings.price}
+        </Txt>
+        <Price value={coin.price} size={40} />
+        <ChangePill value={coin.change24h} plain />
+      </Animated.View>
 
-        <View style={{ marginTop: space.lg }}>
-          <Chips<ChartRange>
-            value={range}
-            onChange={setRange}
-            options={[
-              { value: '1', label: '1D' },
-              { value: '7', label: '1W' },
-              { value: '30', label: '1M' },
-              { value: '365', label: '1Y' },
-            ]}
+      <View style={styles.chart}>
+        {chart === null ? (
+          <ActivityIndicator color={colors.accent} />
+        ) : (
+          <AreaChart
+            key={chartKey}
+            data={series}
+            height={210}
+            marker
+            color={rising ? colors.up : colors.down}
           />
-        </View>
+        )}
+      </View>
 
-        <View style={styles.chart}>
-          {chart === null ? (
-            <ActivityIndicator color={colors.accent} />
-          ) : (
-            <AreaChart data={series} height={220} marker color={rising ? colors.up : colors.down} />
-          )}
-        </View>
+      <View style={{ paddingHorizontal: space.lg }}>
+        <Segmented<ChartRange>
+          size="sm"
+          value={range}
+          onChange={setRange}
+          options={[
+            { value: '1', label: '1D' },
+            { value: '7', label: '1W' },
+            { value: '30', label: '1M' },
+            { value: '365', label: '1Y' },
+          ]}
+        />
+      </View>
 
-        <View style={styles.card}>
-          <View style={styles.cardHead}>
-            <Txt size={16} weight="semibold">
-              {strings.community}
-            </Txt>
-            <Txt size={12} color={colors.warn} weight="bold">
-              {strings.demo} · {consensus.votes} {strings.calls}
-            </Txt>
-          </View>
+      <Animated.View entering={FadeInDown.delay(100).duration(motion.base)}>
+        <Glass style={styles.card}>
+          <CardTitle
+            icon={Users}
+            title={strings.community}
+            right={`${strings.demo} · ${consensus.votes} ${strings.calls}`}
+          />
           <ConsensusBar up={consensus.up} />
-        </View>
+        </Glass>
+      </Animated.View>
 
-        {isStablecoin(coin) ? null : (
-          <View style={styles.card}>
+      {isStablecoin(coin) ? null : (
+        <Animated.View entering={FadeInDown.delay(160).duration(motion.base)}>
+          <Glass style={styles.card}>
             <View style={styles.cardHead}>
-              <Txt size={16} weight="semibold">
-                ⚡ {strings.momentum}
-              </Txt>
-              <Txt size={22} weight="bold" color={momentumColor(score)}>
+              <CardTitle icon={Gauge} title={strings.momentum} />
+              <Txt size={22} weight="semibold" color={momentumColor(score)} numeric>
                 {score}
-                <Txt size={14} color={colors.textFaint}>
-                  /100
+                <Txt size={13} color={colors.textFaint}>
+                  {' '}
+                  / 100
                 </Txt>
               </Txt>
             </View>
@@ -137,55 +174,94 @@ export default function CoinScreen() {
             <Txt size={12} color={colors.textMuted}>
               {strings.momentumHint}
             </Txt>
+          </Glass>
+        </Animated.View>
+      )}
+
+      <Animated.View entering={FadeInDown.delay(220).duration(motion.base)}>
+        <Glass style={[styles.card, { gap: space.lg }]}>
+          <Txt size={16} weight="semibold">
+            {strings.keyStats}
+          </Txt>
+          <Stat icon={CircleDollarSign} label={strings.marketCap} value={formatCompact(coin.marketCap)} />
+          <Stat icon={Activity} label={strings.volume24h} value={formatCompact(coin.volume24h)} />
+          <View style={{ gap: 10 }}>
+            <Stat icon={MoveHorizontal} label={strings.range24h} value="" />
+            <RangeBar position={dayRange} />
+            <View style={styles.rangeLabels}>
+              <Txt size={12} color={colors.textMuted} numeric>
+                {formatPrice(coin.low24h)}
+              </Txt>
+              <Txt size={12} color={colors.textMuted} numeric>
+                {formatPrice(coin.high24h)}
+              </Txt>
+            </View>
           </View>
-        )}
+        </Glass>
+      </Animated.View>
 
-        <View style={[styles.card, { gap: space.md }]}>
-          <Stat label={strings.marketCap} value={formatCompact(coin.marketCap)} />
-          <Stat label={strings.volume24h} value={formatCompact(coin.volume24h)} />
-          <Stat label={strings.high24h} value={formatPrice(coin.high24h)} />
-          <Stat label={strings.low24h} value={formatPrice(coin.low24h)} />
-        </View>
+      <Disclaimer />
+    </Screen>
+  );
+}
 
-        <Disclaimer />
-      </Screen>
-
-      <View style={styles.actions}>
-        <CallButton direction="down" coinId={coin.id} />
-        <CallButton direction="up" coinId={coin.id} />
+function CardTitle({ icon: Icon, title, right }: { icon: LucideIcon; title: string; right?: string }) {
+  return (
+    <View style={styles.cardHead}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+        <Icon size={17} color={colors.textMuted} strokeWidth={1.9} />
+        <Txt size={16} weight="semibold">
+          {title}
+        </Txt>
       </View>
+      {right ? (
+        <Txt size={11} weight="semibold" color={colors.warn}>
+          {right}
+        </Txt>
+      ) : null}
     </View>
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value: string }) {
   return (
-    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-      <Txt size={14} color={colors.textMuted}>
-        {label}
-      </Txt>
-      <Txt size={14} weight="semibold">
+    <View style={styles.stat}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+        <Icon size={16} color={colors.textMuted} strokeWidth={1.9} />
+        <Txt size={14} color={colors.textMuted}>
+          {label}
+        </Txt>
+      </View>
+      <Txt size={14} weight="semibold" numeric>
         {value}
       </Txt>
     </View>
   );
 }
 
+function RangeBar({ position }: { position: number }) {
+  const p = Math.min(1, Math.max(0, position));
+  return (
+    <View style={styles.rangeTrack}>
+      <View style={[styles.rangeFill, { width: `${p * 100}%` }]} />
+      <View style={[styles.rangeKnob, { left: `${p * 100}%` }]} />
+    </View>
+  );
+}
+
 function CallButton({ direction, coinId }: { direction: 'up' | 'down'; coinId: string }) {
   const up = direction === 'up';
+  const Icon = up ? TrendingUp : TrendingDown;
   return (
-    <Pressable
+    <PressableScale
       accessibilityRole="button"
       onPress={() => router.push({ pathname: '/call/new', params: { coin: coinId, direction } })}
-      style={({ pressed }) => [
-        styles.callBtn,
-        { backgroundColor: up ? colors.accent : colors.surfaceRaised },
-        pressed && { opacity: 0.85 },
-      ]}>
-      <Txt size={16} weight="semibold" color={up ? colors.accentInk : colors.text}>
-        {up ? `↑ ${strings.callUp}` : `↓ ${strings.callDown}`}
+      style={[styles.callBtn, up ? styles.callUp : styles.callDown]}>
+      <Icon size={18} color={colors.text} strokeWidth={2.2} />
+      <Txt size={15} weight="semibold">
+        {up ? strings.callUp : strings.callDown}
       </Txt>
-    </Pressable>
+    </PressableScale>
   );
 }
 
@@ -196,21 +272,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: space.lg,
   },
-  pad: { paddingHorizontal: space.lg, gap: space.sm, marginTop: space.md },
-  row: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
-  chart: { height: 220, marginTop: space.lg, justifyContent: 'center' },
-  card: {
-    marginHorizontal: space.lg,
-    marginTop: space.lg,
-    padding: space.lg,
-    gap: space.md,
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
+  headerTitle: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  pad: { paddingHorizontal: space.lg, gap: 4, marginTop: space.md },
+  chart: { height: 210, marginVertical: space.lg, justifyContent: 'center' },
+  card: { marginHorizontal: space.lg, marginTop: space.lg, padding: space.lg, gap: space.md },
   cardHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  actions: {
+  stat: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  rangeTrack: { height: 4, borderRadius: 2, backgroundColor: colors.surfaceRaised },
+  rangeFill: { height: 4, borderRadius: 2, backgroundColor: colors.accent },
+  rangeKnob: {
+    position: 'absolute',
+    top: -4,
+    width: 12,
+    height: 12,
+    marginLeft: -6,
+    borderRadius: 6,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 2,
+    borderColor: colors.accent,
+  },
+  rangeLabels: { flexDirection: 'row', justifyContent: 'space-between' },
+  footer: {
     position: 'absolute',
     left: 0,
     right: 0,
@@ -219,8 +301,19 @@ const styles = StyleSheet.create({
     gap: space.md,
     paddingHorizontal: space.lg,
     paddingTop: space.md,
-    paddingBottom: space.xl,
-    backgroundColor: colors.bg,
+    backgroundColor: 'rgba(11, 12, 20, 0.92)',
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
   },
-  callBtn: { flex: 1, height: 58, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center' },
+  callBtn: {
+    flex: 1,
+    height: 52,
+    flexDirection: 'row',
+    gap: 8,
+    borderRadius: radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  callUp: { backgroundColor: colors.accent },
+  callDown: { backgroundColor: colors.surfaceRaised, borderWidth: 1, borderColor: colors.border },
 });

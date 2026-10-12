@@ -1,15 +1,16 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { ChevronRight, Sparkles, TrendingDown, TrendingUp, UserRound } from 'lucide-react-native';
 import { StyleSheet, View } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { CoinAvatar } from '@/components/coin-avatar';
+import { Glass } from '@/components/glass';
 import { Screen } from '@/components/screen';
-import { SectionHeader } from '@/components/section-header';
 import { Txt } from '@/components/text';
 import { strings } from '@/i18n';
 import { formatPercent, formatPrice } from '@/lib/format';
 import { useCalls } from '@/state/calls';
 import { useMarket } from '@/state/market';
-import { colors, radius, space } from '@/theme';
+import { colors, motion, radius, space } from '@/theme';
 
 export default function Profile() {
   const { calls } = useCalls();
@@ -19,14 +20,14 @@ export default function Profile() {
     <Screen>
       <View style={styles.head}>
         <View style={styles.avatar}>
-          <Ionicons name="person" size={30} color={colors.accentInk} />
+          <UserRound size={28} color={colors.text} strokeWidth={1.8} />
         </View>
-        <View>
-          <Txt size={22} weight="semibold">
+        <View style={{ gap: 2 }}>
+          <Txt size={20} weight="semibold">
             @you
           </Txt>
-          <Txt size={14} color={colors.textMuted}>
-            Callout
+          <Txt size={13} color={colors.textMuted}>
+            {strings.memberSince}
           </Txt>
         </View>
       </View>
@@ -37,121 +38,138 @@ export default function Profile() {
         <Stat label={strings.streak} value="—" />
       </View>
 
-      <View style={styles.pro}>
-        <View style={{ flex: 1, gap: 4 }}>
-          <Txt size={18} weight="semibold">
-            ⚡ {strings.premium}
+      <Glass style={styles.pro}>
+        <View style={styles.proIcon}>
+          <Sparkles size={20} color={colors.accentInk} strokeWidth={1.9} />
+        </View>
+        <View style={{ flex: 1, gap: 2 }}>
+          <Txt size={15} weight="semibold">
+            {strings.premium}
           </Txt>
-          <Txt size={13} color={colors.textMuted}>
+          <Txt size={12} color={colors.textMuted}>
             {strings.premiumSubtitle}
           </Txt>
         </View>
-        <View style={styles.soon}>
-          <Txt size={12} weight="semibold" color={colors.accentInk}>
-            {strings.comingSoon}
-          </Txt>
-        </View>
-      </View>
+        <ChevronRight size={18} color={colors.textMuted} />
+      </Glass>
 
-      <SectionHeader title={strings.myCalls} />
-      {calls.length === 0 ? (
-        <Txt size={14} color={colors.textMuted} style={styles.empty}>
-          {strings.noCalls}
+      <Glass style={styles.list}>
+        <Txt
+          size={16}
+          weight="semibold"
+          style={{ paddingHorizontal: space.lg, paddingTop: space.lg, paddingBottom: space.sm }}>
+          {strings.myCalls}
         </Txt>
-      ) : (
-        calls.map((call) => {
-          const now = coins.find((c) => c.id === call.coinId)?.price ?? call.entryPrice;
-          const move = ((now - call.entryPrice) / call.entryPrice) * 100;
-          const winning = call.direction === 'up' ? move >= 0 : move <= 0;
-          const up = call.direction === 'up';
-          return (
-            <View key={call.id} style={styles.call}>
-              <CoinAvatar uri={call.image} symbol={call.symbol} />
-              <View style={{ flex: 1, gap: 2 }}>
-                <Txt size={16} weight="semibold">
-                  {call.symbol}{' '}
-                  <Txt size={16} weight="semibold" color={up ? colors.up : colors.down}>
-                    {up ? '↑' : '↓'} {call.timeframe}
+        {calls.length === 0 ? (
+          <Txt size={14} color={colors.textMuted} style={styles.empty}>
+            {strings.noCalls}
+          </Txt>
+        ) : (
+          calls.map((call, i) => {
+            const now = coins.find((c) => c.id === call.coinId)?.price ?? call.entryPrice;
+            const move = ((now - call.entryPrice) / call.entryPrice) * 100;
+            const up = call.direction === 'up';
+            const winning = up ? move >= 0 : move <= 0;
+            const Icon = up ? TrendingUp : TrendingDown;
+            return (
+              <Animated.View
+                key={call.id}
+                entering={FadeInDown.delay(i * motion.stagger).duration(motion.base)}
+                style={styles.call}>
+                <CoinAvatar uri={call.image} symbol={call.symbol} size={38} />
+                <View style={{ flex: 1, gap: 3 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Txt size={15} weight="semibold">
+                      {call.symbol}
+                    </Txt>
+                    <View style={[styles.tag, { backgroundColor: up ? colors.upSoft : colors.downSoft }]}>
+                      <Icon size={12} color={up ? colors.up : colors.down} strokeWidth={2.2} />
+                      <Txt size={11} weight="semibold" color={up ? colors.up : colors.down}>
+                        {call.timeframe}
+                      </Txt>
+                    </View>
+                  </View>
+                  <Txt size={12} color={colors.textMuted} numeric>
+                    {strings.entry} {formatPrice(call.entryPrice)}
+                    {call.targetPrice ? ` · ${strings.target} ${formatPrice(call.targetPrice)}` : ''}
                   </Txt>
-                </Txt>
-                <Txt size={12} color={colors.textMuted}>
-                  {strings.entry} {formatPrice(call.entryPrice)}
-                  {call.targetPrice ? ` · ${strings.target} ${formatPrice(call.targetPrice)}` : ''}
-                </Txt>
-              </View>
-              <View style={{ alignItems: 'flex-end', gap: 2 }}>
-                <Txt size={15} weight="semibold" color={winning ? colors.up : colors.down}>
-                  {formatPercent(move)}
-                </Txt>
-                <Txt size={12} color={colors.textMuted}>
-                  {strings.pending}
-                </Txt>
-              </View>
-            </View>
-          );
-        })
-      )}
+                </View>
+                <View style={{ alignItems: 'flex-end', gap: 3 }}>
+                  <Txt size={15} weight="semibold" color={winning ? colors.up : colors.down} numeric>
+                    {formatPercent(move)}
+                  </Txt>
+                  <Txt size={12} color={colors.textMuted}>
+                    {strings.pending}
+                  </Txt>
+                </View>
+              </Animated.View>
+            );
+          })
+        )}
+      </Glass>
     </Screen>
   );
 }
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <View style={styles.stat}>
-      <Txt size={24} weight="semibold">
+    <Glass style={styles.stat}>
+      <Txt size={22} weight="semibold" numeric>
         {value}
       </Txt>
-      <Txt size={13} color={colors.textMuted}>
+      <Txt size={12} color={colors.textMuted}>
         {label}
       </Txt>
-    </View>
+    </Glass>
   );
 }
 
 const styles = StyleSheet.create({
   head: { flexDirection: 'row', alignItems: 'center', gap: space.lg, paddingHorizontal: space.lg },
   avatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: colors.accent,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: colors.accentSoft,
+    borderWidth: 1,
+    borderColor: colors.accent,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  stats: { flexDirection: 'row', gap: space.md, paddingHorizontal: space.lg, marginTop: space.xl },
-  stat: {
-    flex: 1,
-    padding: space.lg,
-    gap: 2,
-    borderRadius: radius.md,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
+  stats: { flexDirection: 'row', gap: space.sm, paddingHorizontal: space.lg, marginTop: space.xl },
+  stat: { flex: 1, padding: space.lg, gap: 2, borderRadius: radius.md },
   pro: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: space.md,
     marginHorizontal: space.lg,
-    marginTop: space.lg,
+    marginTop: space.md,
     padding: space.lg,
     borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.accent,
-    backgroundColor: colors.accentSoft,
   },
-  soon: {
+  proIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: colors.accent,
-    borderRadius: radius.pill,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  empty: { paddingHorizontal: space.lg, lineHeight: 21 },
+  list: { marginHorizontal: space.lg, marginTop: space.md, paddingBottom: space.sm },
+  empty: { paddingHorizontal: space.lg, paddingBottom: space.lg, lineHeight: 21 },
   call: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: space.md,
     paddingHorizontal: space.lg,
-    paddingVertical: space.md,
+    paddingVertical: 11,
+  },
+  tag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: radius.pill,
   },
 });

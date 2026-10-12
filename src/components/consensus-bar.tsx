@@ -1,24 +1,45 @@
+import { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
+import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 import { strings } from '@/i18n';
-import { colors, radius, space } from '@/theme';
+import { colors, motion, radius } from '@/theme';
 import { Txt } from './text';
 
-export function ConsensusBar({ up, compact = false }: { up: number; compact?: boolean }) {
-  const down = 100 - up;
+/** Up/down split of community calls; the bar grows in from the center. */
+export function ConsensusBar({ up }: { up: number }) {
+  const progress = useSharedValue(0);
+  useEffect(() => {
+    progress.value = 0;
+    progress.value = withTiming(1, { duration: motion.slow, easing: Easing.out(Easing.cubic) });
+  }, [up, progress]);
+
+  const upStyle = useAnimatedStyle(() => ({ width: `${up * progress.value}%` }));
+  const downStyle = useAnimatedStyle(() => ({ width: `${(100 - up) * progress.value}%` }));
+
   return (
-    <View style={{ gap: compact ? 6 : space.sm }}>
+    <View style={{ gap: 10 }}>
       <View style={styles.labels}>
-        <Txt size={compact ? 12 : 14} weight="semibold" color={colors.up}>
-          {strings.bullish} {up}%
+        <Txt size={13} weight="medium" color={colors.textMuted}>
+          {strings.bullish}{' '}
+          <Txt size={13} weight="semibold" color={colors.up} numeric>
+            {up}%
+          </Txt>
         </Txt>
-        <Txt size={compact ? 12 : 14} weight="semibold" color={colors.down}>
-          {down}% {strings.bearish}
+        <Txt size={13} weight="medium" color={colors.textMuted}>
+          <Txt size={13} weight="semibold" color={colors.down} numeric>
+            {100 - up}%
+          </Txt>{' '}
+          {strings.bearish}
         </Txt>
       </View>
-      <View style={[styles.track, { height: compact ? 6 : 10 }]}>
-        <View style={{ flex: up, backgroundColor: colors.up, borderRadius: radius.pill }} />
-        <View style={{ flex: down, backgroundColor: colors.down, borderRadius: radius.pill }} />
+      <View style={styles.track}>
+        <View style={[styles.half, { flex: up, alignItems: 'flex-end' }]}>
+          <Animated.View style={[styles.fill, { backgroundColor: colors.up }, upStyle]} />
+        </View>
+        <View style={[styles.half, { flex: 100 - up }]}>
+          <Animated.View style={[styles.fill, { backgroundColor: colors.down }, downStyle]} />
+        </View>
       </View>
     </View>
   );
@@ -26,5 +47,7 @@ export function ConsensusBar({ up, compact = false }: { up: number; compact?: bo
 
 const styles = StyleSheet.create({
   labels: { flexDirection: 'row', justifyContent: 'space-between' },
-  track: { flexDirection: 'row', gap: 3 },
+  track: { flexDirection: 'row', gap: 4, height: 6 },
+  half: { borderRadius: radius.pill, backgroundColor: colors.surfaceRaised, overflow: 'hidden' },
+  fill: { height: '100%', borderRadius: radius.pill },
 });
