@@ -1,202 +1,75 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getLocales } from 'expo-localization';
 
-const en = {
-  onbLogin: 'Log in',
-  onbNext: 'Continue',
-  onbStart: 'Get started',
-  onb1Title: 'Make your\ncall',
-  onb1Text: 'Up or down, with a target and a deadline. Put your read of the market on record.',
-  onb2Title: 'See what the\ncrowd thinks',
-  onb2Text: 'Live consensus from every caller, for every coin, from Bitcoin to the newest memecoin.',
-  onb3Title: 'Read the\nmomentum',
-  onb3Text: 'Volume, trend and activity in one clear score. Information, never advice.',
-  onb4Title: 'Climb the\nranking',
-  onb4Text: 'Every call is checked automatically. The sharpest callers rise to the top.',
-  terms: 'By continuing you agree to the Callout Terms of Service and Privacy Policy.',
-  welcomeTitle: 'Welcome',
-  welcomeText: 'Your next call starts here',
-  withEmail: 'Continue with email',
-  withGoogle: 'Continue with Google',
-  withApple: 'Continue with Apple',
-  guest: 'Explore without an account',
-  socialSoon: 'Google and Apple sign-in arrive with online accounts. Use email for now.',
-  signUp: 'Create account',
-  signIn: 'Log in',
-  signUpTitle: 'Create your\naccount',
-  signInTitle: 'Welcome\nback',
-  nameLabel: 'Name',
-  namePlaceholder: 'How should we call you?',
-  emailLabel: 'Email',
-  passwordLabel: 'Password',
-  passwordHint: 'At least 8 characters',
-  invalidEmail: 'Enter a valid email.',
-  shortPassword: 'Password needs at least 8 characters.',
-  nameRequired: 'Tell us your name.',
-  signOut: 'Log out',
-  guestName: 'Guest',
-  greeting: 'Hello',
-  homeTitle: "What's your\ncall today?",
-  topCoins: 'Top coins',
-  gainers: 'Gainers',
-  thisWeek: 'this week',
-  trendingShort: 'Trending',
-  keyStats: 'Key stats',
-  range24h: '24h range',
-  popular: 'Popular assets',
-  results: 'Results',
-  memberSince: 'Callout member',
-  targetAbove: 'For an up call the target must be above the current price.',
-  targetBelow: 'For a down call the target must be below the current price.',
-  losers: 'Losers',
-  trending: 'Trending now',
-  seeAll: 'See all',
-  price: 'Price',
-  community: 'Community',
-  bullish: 'Up',
-  bearish: 'Down',
-  momentum: 'Momentum',
-  momentumHint:
-    'Measures what the market is doing right now (volume, trend, activity). It is not a forecast and not a recommendation.',
-  markets: 'Markets',
-  searchPlaceholder: 'Search coin',
-  ranking: 'Ranking',
-  rankingSubtitle: 'Best callers this month',
-  accuracy: 'accuracy',
-  calls: 'calls',
-  profile: 'Profile',
-  myCalls: 'My calls',
-  noCalls: "You haven't made any call yet.\nTap the button in the middle to start.",
-  newCall: 'New call',
-  pickCoin: 'Coin',
-  direction: 'Direction',
-  willGoUp: 'Goes up',
-  willGoDown: 'Goes down',
-  targetPrice: 'Target price (optional)',
-  timeframe: 'Timeframe',
-  makeCall: 'Make the call',
-  callUp: 'Call up',
-  callDown: 'Call down',
-  current: 'Current',
-  open: 'Open',
-  marketCap: 'Market cap',
-  volume24h: 'Volume 24h',
-  high24h: 'High 24h',
-  low24h: 'Low 24h',
-  disclaimer:
-    'Market information and community opinions only. Not financial advice. Crypto, especially memecoins, can go to zero.',
-  demo: 'DEMO',
-  offline: 'Offline — showing sample data',
-  pending: 'Open',
-  entry: 'Entry',
-  target: 'Target',
-  premium: 'Callout Pro',
-  premiumSubtitle: 'Alerts, full risk indicators and Momentum history.',
-  comingSoon: 'Coming soon',
-  callsMade: 'Calls',
-  hitRate: 'Hit rate',
-  streak: 'Streak',
-};
+import { de } from './locales/de';
+import { en, type Strings } from './locales/en';
+import { es } from './locales/es';
+import { fr } from './locales/fr';
+import { hi } from './locales/hi';
+import { it } from './locales/it';
+import { pt } from './locales/pt';
+import { ru } from './locales/ru';
+import { tr } from './locales/tr';
+import { zh } from './locales/zh';
 
-type Strings = typeof en;
+export type { Strings };
 
-const pt: Strings = {
-  onbLogin: 'Entrar',
-  onbNext: 'Continuar',
-  onbStart: 'Começar',
-  onb1Title: 'Faz a tua\ncall',
-  onb1Text: 'Sobe ou desce, com alvo e prazo. Deixa a tua leitura do mercado registada.',
-  onb2Title: 'Vê o que a\nmalta pensa',
-  onb2Text: 'Consenso ao vivo de todos os previsores, para cada moeda, da Bitcoin à memecoin mais recente.',
-  onb3Title: 'Lê o\nmomentum',
-  onb3Text: 'Volume, tendência e atividade num score claro. Informação, nunca aconselhamento.',
-  onb4Title: 'Sobe no\nranking',
-  onb4Text: 'Cada call é verificada automaticamente. Os melhores previsores chegam ao topo.',
-  terms: 'Ao continuar aceitas os Termos de Serviço e a Política de Privacidade do Callout.',
-  welcomeTitle: 'Bem-vindo',
-  welcomeText: 'A tua próxima call começa aqui',
-  withEmail: 'Continuar com email',
-  withGoogle: 'Continuar com Google',
-  withApple: 'Continuar com Apple',
-  guest: 'Explorar sem conta',
-  socialSoon: 'O login com Google e Apple chega com as contas online. Por agora usa o email.',
-  signUp: 'Criar conta',
-  signIn: 'Entrar',
-  signUpTitle: 'Cria a tua\nconta',
-  signInTitle: 'Bem-vindo\nde volta',
-  nameLabel: 'Nome',
-  namePlaceholder: 'Como te chamamos?',
-  emailLabel: 'Email',
-  passwordLabel: 'Senha',
-  passwordHint: 'Pelo menos 8 caracteres',
-  invalidEmail: 'Escreve um email válido.',
-  shortPassword: 'A senha precisa de pelo menos 8 caracteres.',
-  nameRequired: 'Diz-nos o teu nome.',
-  signOut: 'Terminar sessão',
-  guestName: 'Convidado',
-  greeting: 'Olá',
-  homeTitle: 'Qual é a tua\ncall hoje?',
-  topCoins: 'Principais moedas',
-  gainers: 'A subir',
-  thisWeek: 'esta semana',
-  trendingShort: 'Em alta',
-  keyStats: 'Dados principais',
-  range24h: 'Intervalo 24h',
-  popular: 'Ativos populares',
-  results: 'Resultados',
-  memberSince: 'Membro Callout',
-  targetAbove: 'Numa call de subida o alvo tem de estar acima do preço atual.',
-  targetBelow: 'Numa call de descida o alvo tem de estar abaixo do preço atual.',
-  losers: 'A descer',
-  trending: 'Em alta agora',
-  seeAll: 'Ver tudo',
-  price: 'Preço',
-  community: 'Comunidade',
-  bullish: 'Sobe',
-  bearish: 'Desce',
-  momentum: 'Momentum',
-  momentumHint:
-    'Mede o que o mercado está a fazer agora (volume, tendência, atividade). Não é uma previsão nem uma recomendação.',
-  markets: 'Mercado',
-  searchPlaceholder: 'Procurar moeda',
-  ranking: 'Ranking',
-  rankingSubtitle: 'Melhores previsores do mês',
-  accuracy: 'acerto',
-  calls: 'calls',
-  profile: 'Perfil',
-  myCalls: 'As minhas calls',
-  noCalls: 'Ainda não fizeste nenhuma call.\nToca no botão do meio para começar.',
-  newCall: 'Nova call',
-  pickCoin: 'Moeda',
-  direction: 'Direção',
-  willGoUp: 'Vai subir',
-  willGoDown: 'Vai descer',
-  targetPrice: 'Preço alvo (opcional)',
-  timeframe: 'Prazo',
-  makeCall: 'Fazer a call',
-  callUp: 'Call sobe',
-  callDown: 'Call desce',
-  current: 'Atual',
-  open: 'Abertura',
-  marketCap: 'Capitalização',
-  volume24h: 'Volume 24h',
-  high24h: 'Máxima 24h',
-  low24h: 'Mínima 24h',
-  disclaimer:
-    'Apenas informação de mercado e opiniões da comunidade. Não é aconselhamento financeiro. Cripto, sobretudo memecoins, pode ir a zero.',
-  demo: 'DEMO',
-  offline: 'Sem ligação — a mostrar dados de exemplo',
-  pending: 'Aberta',
-  entry: 'Entrada',
-  target: 'Alvo',
-  premium: 'Callout Pro',
-  premiumSubtitle: 'Alertas, indicadores de risco completos e histórico do Momentum.',
-  comingSoon: 'Em breve',
-  callsMade: 'Calls',
-  hitRate: 'Acerto',
-  streak: 'Sequência',
-};
+/** Languages offered in Settings, shown by their own name. */
+export const LANGUAGES = [
+  { code: 'pt', name: 'Português', table: pt },
+  { code: 'en', name: 'English', table: en },
+  { code: 'es', name: 'Español', table: es },
+  { code: 'fr', name: 'Français', table: fr },
+  { code: 'de', name: 'Deutsch', table: de },
+  { code: 'it', name: 'Italiano', table: it },
+  { code: 'ru', name: 'Русский', table: ru },
+  { code: 'tr', name: 'Türkçe', table: tr },
+  { code: 'zh', name: '中文', table: zh },
+  { code: 'hi', name: 'हिन्दी', table: hi },
+] as const;
 
-const language = getLocales()[0]?.languageCode ?? 'en';
+export type LanguageCode = (typeof LANGUAGES)[number]['code'];
 
-export const strings: Strings = language === 'pt' ? pt : en;
-export const locale = getLocales()[0]?.languageTag ?? 'en-US';
+const KEY = 'callout.language.v1';
+
+function deviceLanguage(): LanguageCode {
+  const code = getLocales()[0]?.languageCode ?? 'en';
+  return (LANGUAGES.find((l) => l.code === code)?.code ?? 'en') as LanguageCode;
+}
+
+let current: LanguageCode = deviceLanguage();
+
+/**
+ * Active strings. Screens read `strings.someKey` while rendering; switching
+ * language swaps the table in place and the root re-mounts the UI.
+ */
+export const strings: Strings = { ...(LANGUAGES.find((l) => l.code === current)?.table ?? en) };
+
+function apply(code: LanguageCode) {
+  current = code;
+  Object.assign(strings, LANGUAGES.find((l) => l.code === code)?.table ?? en);
+}
+
+export function currentLanguage(): LanguageCode {
+  return current;
+}
+
+/** Restores the language picked in Settings (falls back to the device language). */
+export async function loadLanguage(): Promise<LanguageCode> {
+  try {
+    const saved = (await AsyncStorage.getItem(KEY)) as LanguageCode | null;
+    if (saved && LANGUAGES.some((l) => l.code === saved)) apply(saved);
+  } catch {
+    // keep device language
+  }
+  return current;
+}
+
+export async function setLanguage(code: LanguageCode): Promise<void> {
+  apply(code);
+  try {
+    await AsyncStorage.setItem(KEY, code);
+  } catch {
+    // still applied for this session
+  }
+}

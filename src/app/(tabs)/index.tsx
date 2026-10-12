@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { Bell, Flame, Plus, Search, Sparkles, Trophy, WifiOff, type LucideIcon } from 'lucide-react-native';
+import { Flame, Plus, Search, Settings2, Trophy, WifiOff, type LucideIcon } from 'lucide-react-native';
 import { useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
@@ -10,7 +10,7 @@ import { CoinRow } from '@/components/coin-row';
 import { Disclaimer } from '@/components/disclaimer';
 import { Glass } from '@/components/glass';
 import { IconButton } from '@/components/icon-button';
-import { LogoMark } from '@/components/logo';
+import { AnimatedLogo, ProLogo } from '@/components/animated-logo';
 import { PressableScale } from '@/components/pressable-scale';
 import { Price } from '@/components/price';
 import { Screen } from '@/components/screen';
@@ -48,7 +48,7 @@ export default function Home() {
     <Screen>
       <View style={styles.top}>
         <View style={styles.brand}>
-          <LogoMark size={30} />
+          <AnimatedLogo size={38} />
           <Txt size={19} weight="semibold">
             Callout
           </Txt>
@@ -59,7 +59,7 @@ export default function Home() {
             label={strings.searchPlaceholder}
             onPress={() => router.push('/markets')}
           />
-          <IconButton icon={Bell} label="Notifications" />
+          <IconButton icon={Settings2} label={strings.settings} onPress={() => router.push('/settings')} />
         </View>
       </View>
 
@@ -125,7 +125,7 @@ export default function Home() {
               <Glass style={styles.promo}>
                 <View style={{ flex: 1, gap: 6 }}>
                   <Txt size={16} weight="semibold">
-                    {strings.premium}
+                    Callout Pro
                   </Txt>
                   <Txt size={13} color={colors.textMuted}>
                     {strings.premiumSubtitle}
@@ -137,9 +137,8 @@ export default function Home() {
                   </View>
                 </View>
                 <View style={styles.promoArt}>
-                  <View style={[styles.orb, { width: 76, height: 76, opacity: 0.35 }]} />
-                  <View style={[styles.orb, { width: 52, height: 52, opacity: 0.6 }]} />
-                  <Sparkles size={26} color="#FFFFFF" strokeWidth={1.8} />
+                  <View style={styles.orb} />
+                  <ProLogo size={64} />
                 </View>
               </Glass>
             </PressableScale>
@@ -220,7 +219,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: space.lg,
   },
-  brand: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  brand: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   offline: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -260,7 +259,14 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   promoArt: { width: 84, height: 84, alignItems: 'center', justifyContent: 'center' },
-  orb: { position: 'absolute', borderRadius: 999, backgroundColor: colors.accent },
+  orb: {
+    position: 'absolute',
+    width: 84,
+    height: 84,
+    borderRadius: 42,
+    backgroundColor: colors.accent,
+    opacity: 0.18,
+  },
   listCard: { marginHorizontal: space.lg, marginTop: space.lg, paddingBottom: space.sm },
   cardHeader: { paddingHorizontal: space.lg, paddingTop: space.lg, paddingBottom: space.xs, gap: space.sm },
 });

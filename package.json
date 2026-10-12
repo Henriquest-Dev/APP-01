@@ -19,6 +19,7 @@
     "expo-linking": "~57.0.12",
     "expo-localization": "~57.0.2",
     "expo-router": "~57.0.26",
+    "expo-sensors": "~57.0.3",
     "expo-splash-screen": "~57.0.10",
     "expo-status-bar": "~57.0.1",
     "expo-symbols": "~57.0.3",
@@ -50,7 +51,7 @@
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write \"src/**/*.{ts,tsx}\"",
-    "build:aab": "expo prebuild --platform android --no-install && cd android && ./gradlew bundleRelease"
+    "build:aab": "expo prebuild --platform android --no-install && cd android && ./gradlew bundleRelease -PreactNativeArchitectures=arm64-v8a,armeabi-v7a"
   },
   "private": true
 }

@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { Mail } from 'lucide-react-native';
+import { Globe, Mail } from 'lucide-react-native';
 import { useState } from 'react';
 import { Platform, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown, FadeInUp, FadeOut } from 'react-native-reanimated';
@@ -8,7 +8,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Background } from '@/components/background';
 import { AppleIcon, GoogleIcon } from '@/components/brand-icons';
 import { FlowField } from '@/components/flow-field';
-import { LogoMark } from '@/components/logo';
+import { AnimatedLogo } from '@/components/animated-logo';
+import { IconButton } from '@/components/icon-button';
 import { PressableScale } from '@/components/pressable-scale';
 import { Txt } from '@/components/text';
 import { strings } from '@/i18n';
@@ -33,7 +34,9 @@ export default function Welcome() {
       <Background />
 
       <Animated.View entering={FadeIn.duration(motion.base)} style={styles.logo}>
-        <LogoMark size={30} />
+        <View style={{ width: 42 }} />
+        <AnimatedLogo size={56} />
+        <IconButton icon={Globe} label={strings.language} onPress={() => router.push('/settings')} />
       </Animated.View>
 
       <Animated.View entering={FadeIn.duration(1200)} style={styles.field}>
@@ -111,7 +114,7 @@ export default function Welcome() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg, paddingHorizontal: space.xl },
-  logo: { alignItems: 'center' },
+  logo: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   field: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   bottom: { gap: space.lg },
   copy: { gap: space.sm, marginBottom: space.sm },

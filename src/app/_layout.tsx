@@ -6,12 +6,14 @@ import {
   useFonts,
 } from '@expo-google-fonts/inter';
 import { Unbounded_700Bold } from '@expo-google-fonts/unbounded';
-import { DarkTheme, Stack, ThemeProvider } from 'expo-router';
+import { DarkTheme, router, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useEffect } from 'react';
 
 import { CallsProvider } from '@/state/calls';
+import { consumeReopenSettings, LanguageProvider } from '@/state/language';
 import { MarketProvider } from '@/state/market';
 import { SessionProvider, useSession } from '@/state/session';
 import { colors } from '@/theme';
@@ -35,16 +37,19 @@ export default function RootLayout() {
   if (!loaded && !error) return null;
 
   return (
-    <ThemeProvider value={theme}>
-      <StatusBar style="light" />
-      <SessionProvider>
-        <MarketProvider>
-          <CallsProvider>
-            <RootStack />
-          </CallsProvider>
-        </MarketProvider>
-      </SessionProvider>
-    </ThemeProvider>
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.bg }}>
+      <ThemeProvider value={theme}>
+        <StatusBar style="light" />
+        <SessionProvider>
+          <MarketProvider>
+            <CallsProvider>
+              {/* Re-mount the UI when the language changes so every screen re-reads its strings. */}
+              <LanguageProvider>{(language) => <RootStack key={language} />}</LanguageProvider>
+            </CallsProvider>
+          </MarketProvider>
+        </SessionProvider>
+      </ThemeProvider>
+    </GestureHandlerRootView>
   );
 }
 
@@ -53,7 +58,9 @@ function RootStack() {
   const { ready, onboarded, signedIn } = useSession();
 
   useEffect(() => {
-    if (ready) SplashScreen.hideAsync();
+    if (!ready) return;
+    SplashScreen.hideAsync();
+    if (consumeReopenSettings()) setTimeout(() => router.navigate('/settings'), 0);
   }, [ready]);
 
   if (!ready) return null;
@@ -82,6 +89,7 @@ function RootStack() {
           options={{ presentation: 'modal', animation: 'slide_from_bottom', gestureDirection: 'vertical' }}
         />
       </Stack.Protected>
+      <Stack.Screen name="settings" />
     </Stack>
   );
 }

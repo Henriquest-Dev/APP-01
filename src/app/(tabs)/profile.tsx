@@ -1,4 +1,7 @@
-import { ChevronRight, LogOut, Sparkles, TrendingDown, TrendingUp, UserRound } from 'lucide-react-native';
+import { ChevronRight, LogOut, Settings2, TrendingDown, TrendingUp, UserRound } from 'lucide-react-native';
+import { router } from 'expo-router';
+import { ProLogo } from '@/components/animated-logo';
+import { IconButton } from '@/components/icon-button';
 import { StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
@@ -25,7 +28,7 @@ export default function Profile() {
         <View style={styles.avatar}>
           <UserRound size={28} color={colors.text} strokeWidth={1.8} />
         </View>
-        <View style={{ gap: 2 }}>
+        <View style={{ gap: 2, flex: 1 }}>
           <Txt size={20} weight="semibold">
             {user?.name ?? strings.guestName}
           </Txt>
@@ -33,6 +36,7 @@ export default function Profile() {
             {user?.email ?? strings.memberSince}
           </Txt>
         </View>
+        <IconButton icon={Settings2} label={strings.settings} onPress={() => router.push('/settings')} />
       </View>
 
       <View style={styles.stats}>
@@ -42,12 +46,10 @@ export default function Profile() {
       </View>
 
       <Glass style={styles.pro}>
-        <View style={styles.proIcon}>
-          <Sparkles size={20} color={colors.accentInk} strokeWidth={1.9} />
-        </View>
+        <ProLogo size={44} />
         <View style={{ flex: 1, gap: 2 }}>
           <Txt size={15} weight="semibold">
-            {strings.premium}
+            Callout Pro
           </Txt>
           <Txt size={12} color={colors.textMuted}>
             {strings.premiumSubtitle}
