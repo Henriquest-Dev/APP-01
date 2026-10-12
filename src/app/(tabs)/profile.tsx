@@ -1,4 +1,4 @@
-import { ChevronRight, Sparkles, TrendingDown, TrendingUp, UserRound } from 'lucide-react-native';
+import { ChevronRight, LogOut, Sparkles, TrendingDown, TrendingUp, UserRound } from 'lucide-react-native';
 import { StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
@@ -10,11 +10,14 @@ import { strings } from '@/i18n';
 import { formatPercent, formatPrice } from '@/lib/format';
 import { useCalls } from '@/state/calls';
 import { useMarket } from '@/state/market';
+import { useSession } from '@/state/session';
+import { PressableScale } from '@/components/pressable-scale';
 import { colors, motion, radius, space } from '@/theme';
 
 export default function Profile() {
   const { calls } = useCalls();
   const { coins } = useMarket();
+  const { user, signOut } = useSession();
 
   return (
     <Screen>
@@ -24,10 +27,10 @@ export default function Profile() {
         </View>
         <View style={{ gap: 2 }}>
           <Txt size={20} weight="semibold">
-            @you
+            {user?.name ?? strings.guestName}
           </Txt>
           <Txt size={13} color={colors.textMuted}>
-            {strings.memberSince}
+            {user?.email ?? strings.memberSince}
           </Txt>
         </View>
       </View>
@@ -107,6 +110,13 @@ export default function Profile() {
           })
         )}
       </Glass>
+
+      <PressableScale accessibilityRole="button" onPress={signOut} style={styles.signOut} scaleTo={0.97}>
+        <LogOut size={17} color={colors.down} strokeWidth={2} />
+        <Txt size={14} weight="semibold" color={colors.down}>
+          {strings.signOut}
+        </Txt>
+      </PressableScale>
     </Screen>
   );
 }
@@ -163,6 +173,15 @@ const styles = StyleSheet.create({
     gap: space.md,
     paddingHorizontal: space.lg,
     paddingVertical: 11,
+  },
+  signOut: {
+    flexDirection: 'row',
+    gap: 8,
+    alignSelf: 'center',
+    alignItems: 'center',
+    marginTop: space.xl,
+    paddingHorizontal: space.lg,
+    paddingVertical: space.md,
   },
   tag: {
     flexDirection: 'row',

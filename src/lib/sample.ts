@@ -11,10 +11,13 @@ const seeds: [string, string, string, number, number, number][] = [
 ];
 
 export const sampleCoins: Coin[] = seeds.map(([id, symbol, name, price, change, cap], i) => {
-  const sparkline = Array.from({ length: 48 }, (_, k) => {
-    const wave = Math.sin((k + i * 3) / 5) * 0.03 + Math.cos((k + i) / 9) * 0.02;
-    return price * (1 + wave + (change / 100) * (k / 47) - change / 200);
-  });
+  // Deterministic random walk that ends at the current price.
+  let seed = 11 + i * 97;
+  const rand = () => (seed = (seed * 16807) % 2147483647) / 2147483647 - 0.5;
+  const walk = [0];
+  for (let k = 1; k < 84; k++) walk.push(walk[k - 1] + rand() * 0.012 + change / 100 / 84);
+  const end = walk[walk.length - 1];
+  const sparkline = walk.map((w) => price * (1 + w - end));
   return {
     id,
     symbol,

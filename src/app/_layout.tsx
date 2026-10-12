@@ -5,6 +5,7 @@ import {
   Inter_700Bold,
   useFonts,
 } from '@expo-google-fonts/inter';
+import { Unbounded_700Bold } from '@expo-google-fonts/unbounded';
 import { DarkTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -12,6 +13,7 @@ import { useEffect } from 'react';
 
 import { CallsProvider } from '@/state/calls';
 import { MarketProvider } from '@/state/market';
+import { SessionProvider, useSession } from '@/state/session';
 import { colors } from '@/theme';
 
 SplashScreen.preventAutoHideAsync();
@@ -27,40 +29,59 @@ export default function RootLayout() {
     Inter_500Medium,
     Inter_600SemiBold,
     Inter_700Bold,
+    Unbounded_700Bold,
   });
-
-  useEffect(() => {
-    if (loaded || error) SplashScreen.hideAsync();
-  }, [loaded, error]);
 
   if (!loaded && !error) return null;
 
   return (
     <ThemeProvider value={theme}>
       <StatusBar style="light" />
-      <MarketProvider>
-        <CallsProvider>
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              contentStyle: { backgroundColor: colors.bg },
-              animation: 'ios_from_right',
-              animationDuration: 320,
-              gestureEnabled: true,
-            }}>
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="coin/[id]" />
-            <Stack.Screen
-              name="call/new"
-              options={{
-                presentation: 'modal',
-                animation: 'slide_from_bottom',
-                gestureDirection: 'vertical',
-              }}
-            />
-          </Stack>
-        </CallsProvider>
-      </MarketProvider>
+      <SessionProvider>
+        <MarketProvider>
+          <CallsProvider>
+            <RootStack />
+          </CallsProvider>
+        </MarketProvider>
+      </SessionProvider>
     </ThemeProvider>
+  );
+}
+
+/** First launch: onboarding → welcome → app. Afterwards straight to the app (or welcome if signed out). */
+function RootStack() {
+  const { ready, onboarded, signedIn } = useSession();
+
+  useEffect(() => {
+    if (ready) SplashScreen.hideAsync();
+  }, [ready]);
+
+  if (!ready) return null;
+
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: colors.bg },
+        animation: 'ios_from_right',
+        animationDuration: 320,
+        gestureEnabled: true,
+      }}>
+      <Stack.Protected guard={!signedIn && !onboarded}>
+        <Stack.Screen name="onboarding" options={{ animation: 'fade' }} />
+      </Stack.Protected>
+      <Stack.Protected guard={!signedIn}>
+        <Stack.Screen name="welcome" options={{ animation: 'fade' }} />
+        <Stack.Screen name="auth" />
+      </Stack.Protected>
+      <Stack.Protected guard={signedIn}>
+        <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
+        <Stack.Screen name="coin/[id]" />
+        <Stack.Screen
+          name="call/new"
+          options={{ presentation: 'modal', animation: 'slide_from_bottom', gestureDirection: 'vertical' }}
+        />
+      </Stack.Protected>
+    </Stack>
   );
 }
