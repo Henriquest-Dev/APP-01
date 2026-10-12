@@ -6,7 +6,7 @@ import { colors } from '@/theme';
 export function LogoMark({
   size = 28,
   color = colors.accent,
-  ink = colors.bg,
+  ink = '#FFFFFF',
 }: {
   size?: number;
   color?: string;
