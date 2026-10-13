@@ -32,7 +32,7 @@ module.exports = function withReleaseSigning(config) {
 
     gradle = gradle.replace(/signingConfigs\s*\{/, (m) => `${m}${signingConfig}`);
     gradle = gradle.replace(
-      /(buildTypes\s*\{[\s\S]*?release\s*\{[\s\S]*?)signingConfig\s+signingConfigs\.debug/,
+      /(buildTypes\s*\{[\s\S]*?release\s*\{[\s\S]*?)signingConfig\s*=?\s*signingConfigs\.debug/,
       '$1signingConfig signingConfigs.release.storeFile ? signingConfigs.release : signingConfigs.debug',
     );
     if (!gradle.includes(MARKER) || !gradle.includes('signingConfigs.release.storeFile')) {
