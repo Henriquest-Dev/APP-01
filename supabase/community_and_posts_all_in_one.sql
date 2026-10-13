@@ -78,7 +78,8 @@ stable
 security definer
 set search_path = public
 as $$
-  select exists (select 1 from public.groups where id = g and is_public) or public.is_group_member(g);
+  select exists (select 1 from public.groups where id = g and (is_public or owner_id = auth.uid()))
+         or public.is_group_member(g);
 $$;
 
 create or replace function public.is_group_owner(g uuid)
@@ -96,7 +97,8 @@ alter table public.group_members enable row level security;
 alter table public.messages enable row level security;
 
 drop policy if exists "Visible groups" on public.groups;
-create policy "Visible groups" on public.groups for select using (is_public or public.is_group_member(id));
+create policy "Visible groups" on public.groups for select
+  using (is_public or owner_id = auth.uid() or public.is_group_member(id));
 drop policy if exists "Create groups" on public.groups;
 create policy "Create groups" on public.groups for insert to authenticated with check (owner_id = auth.uid());
 drop policy if exists "Owners edit groups" on public.groups;

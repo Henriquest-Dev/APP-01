@@ -1,7 +1,20 @@
-import { Bookmark, ChartNoAxesColumn, Heart, MessageCircle, Repeat2, Share, type LucideIcon } from 'lucide-react-native';
+import {
+  Bookmark,
+  ChartNoAxesColumn,
+  Heart,
+  MessageCircle,
+  Repeat2,
+  Share,
+  type LucideIcon,
+} from 'lucide-react-native';
 import { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withSequence, withTiming } from 'react-native-reanimated';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
 
 import { formatCount } from '@/lib/format';
 import { haptic } from '@/lib/haptics';
@@ -42,7 +55,16 @@ export function PostActions(p: Props) {
         onPress={p.onRepost}
         size={22}
       />
-      <Action grow icon={Heart} count={p.likes} active={p.liked} tint={colors.down} fill label="Like" onPress={p.onLike} />
+      <Action
+        grow
+        icon={Heart}
+        count={p.likes}
+        active={p.liked}
+        tint={colors.down}
+        fill
+        label="Like"
+        onPress={p.onLike}
+      />
       <View style={[styles.views, { flex: 1 }]} accessibilityLabel="Views">
         <ChartNoAxesColumn size={19} color={colors.textMuted} strokeWidth={2} />
         <Txt size={13} color={colors.textMuted} numeric>
@@ -50,7 +72,14 @@ export function PostActions(p: Props) {
         </Txt>
       </View>
       <View style={styles.right}>
-        <Action icon={Bookmark} active={p.saved} tint={colors.accentBright} fill label="Bookmark" onPress={p.onSave} />
+        <Action
+          icon={Bookmark}
+          active={p.saved}
+          tint={colors.accentBright}
+          fill
+          label="Bookmark"
+          onPress={p.onSave}
+        />
         <Action icon={Share} label="Share" onPress={p.onShare} />
       </View>
     </View>
@@ -115,8 +144,13 @@ function Action({
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: space.lg, paddingVertical: space.md },
-  action: { flexDirection: 'row', alignItems: 'center', gap: 5, minHeight: 32 },
-  views: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  right: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: space.lg + 2,
+    paddingVertical: space.md + 2,
+  },
+  action: { flexDirection: 'row', alignItems: 'center', gap: 7, minHeight: 36, paddingRight: 10 },
+  views: { flexDirection: 'row', alignItems: 'center', gap: 7, paddingRight: 10 },
+  right: { flexDirection: 'row', alignItems: 'center', gap: 22, marginLeft: 6 },
 });
