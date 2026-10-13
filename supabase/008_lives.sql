@@ -5,6 +5,14 @@
 -- Run after 007_social.sql. Safe to re-run.
 -- =====================================================================
 
+do $$
+begin
+  if to_regclass('public.profile_cards') is null then
+    raise exception 'Run 007_social.sql first, then run this file again.';
+  end if;
+end;
+$$;
+
 create table if not exists public.lives (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null default auth.uid() references public.profiles (id) on delete cascade,

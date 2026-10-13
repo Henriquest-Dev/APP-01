@@ -4,6 +4,15 @@
 -- Run after the other SQL files.
 -- =====================================================================
 
+-- Needs 006_subscriptions.sql first (it creates public.is_pro).
+do $$
+begin
+  if to_regprocedure('public.is_pro(uuid)') is null then
+    raise exception 'Run 006_subscriptions.sql first, then run this file again.';
+  end if;
+end;
+$$;
+
 -- ---- Handles + bio --------------------------------------------------
 alter table public.profiles add column if not exists handle text;
 alter table public.profiles add column if not exists bio text;
