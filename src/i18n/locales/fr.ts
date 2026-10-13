@@ -83,7 +83,7 @@ export const fr: Strings = {
   disclaimer:
     'Uniquement des informations de marché et des avis de la communauté. Pas un conseil financier. Les cryptos, surtout les memecoins, peuvent tomber à zéro.',
   demo: 'DÉMO',
-  offline: 'Hors ligne — données d’exemple',
+  offline: 'Flux de marché limité — prix du serveur Callout',
   pending: 'Ouverte',
   entry: 'Entrée',
   target: 'Cible',

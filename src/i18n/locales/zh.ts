@@ -78,7 +78,7 @@ export const zh: Strings = {
   volume24h: '24小时成交量',
   disclaimer: '仅为市场信息和社区观点，不构成投资建议。加密货币，尤其是 Meme 币，可能归零。',
   demo: '演示',
-  offline: '离线 — 显示示例数据',
+  offline: '行情受限 — 显示 Callout 服务器价格',
   pending: '进行中',
   entry: '入场',
   target: '目标',

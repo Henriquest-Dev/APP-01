@@ -81,7 +81,7 @@ export const de: Strings = {
   disclaimer:
     'Nur Marktinformationen und Meinungen der Community. Keine Finanzberatung. Krypto, besonders Memecoins, kann auf null fallen.',
   demo: 'DEMO',
-  offline: 'Offline — Beispieldaten',
+  offline: 'Marktdaten eingeschränkt — Preise vom Callout-Server',
   pending: 'Offen',
   entry: 'Einstieg',
   target: 'Ziel',

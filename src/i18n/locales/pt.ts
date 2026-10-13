@@ -80,7 +80,7 @@ export const pt: Strings = {
   disclaimer:
     'Apenas informação de mercado e opiniões da comunidade. Não é aconselhamento financeiro. Cripto, sobretudo memecoins, pode ir a zero.',
   demo: 'DEMO',
-  offline: 'Sem ligação — a mostrar dados de exemplo',
+  offline: 'Mercado limitado — a mostrar preços do servidor Callout',
   pending: 'Aberta',
   entry: 'Entrada',
   target: 'Alvo',

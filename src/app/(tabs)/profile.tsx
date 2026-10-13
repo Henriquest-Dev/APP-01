@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { ChevronRight, LogOut, Settings2, TrendingDown, TrendingUp, UserRound } from 'lucide-react-native';
 import { router } from 'expo-router';
 import { ProLogo } from '@/components/animated-logo';
@@ -11,6 +12,7 @@ import { Screen } from '@/components/screen';
 import { Txt } from '@/components/text';
 import { strings } from '@/i18n';
 import { formatPercent, formatPrice, formatTimeLeft } from '@/lib/format';
+import { fetchServerPrices } from '@/lib/server-prices';
 import { callStats } from '@/lib/stats';
 import { useCalls } from '@/state/calls';
 import { useMarket } from '@/state/market';
@@ -23,6 +25,7 @@ export default function Profile() {
   const { coins } = useMarket();
   const { user, signOut } = useSession();
   const stats = callStats(calls);
+  const serverPrices = useServerPrices(calls.filter((c) => c.status === 'open').map((c) => c.symbol));
 
   return (
     <Screen>
@@ -89,7 +92,9 @@ export default function Profile() {
           calls.map((call, i) => {
             const open = call.status === 'open';
             const now = open
-              ? (coins.find((c) => c.id === call.coinId)?.price ?? call.entryPrice)
+              ? (serverPrices[call.symbol] ??
+                coins.find((c) => c.id === call.coinId)?.price ??
+                call.entryPrice)
               : (call.exitPrice ?? call.entryPrice);
             const move = ((now - call.entryPrice) / call.entryPrice) * 100;
             const up = call.direction === 'up';
@@ -258,3 +263,24 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
   },
 });
+
+/** Prices of the coins in open calls, from the same source that settles them. */
+function useServerPrices(symbols: string[]) {
+  const key = [...new Set(symbols)].sort().join(',');
+  const [prices, setPrices] = useState<Record<string, number>>({});
+  useEffect(() => {
+    if (!key) return;
+    let alive = true;
+    const load = () =>
+      fetchServerPrices(key.split(','))
+        .then((p) => alive && setPrices(p))
+        .catch(() => {});
+    load();
+    const timer = setInterval(load, 60_000);
+    return () => {
+      alive = false;
+      clearInterval(timer);
+    };
+  }, [key]);
+  return prices;
+}

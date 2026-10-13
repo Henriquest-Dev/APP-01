@@ -78,7 +78,7 @@ export const en = {
   disclaimer:
     'Market information and community opinions only. Not financial advice. Crypto, especially memecoins, can go to zero.',
   demo: 'DEMO',
-  offline: 'Offline — showing sample data',
+  offline: 'Market feed limited — showing prices from the Callout server',
   pending: 'Open',
   entry: 'Entry',
   target: 'Target',

@@ -80,7 +80,7 @@ export const tr: Strings = {
   disclaimer:
     'Yalnızca piyasa bilgisi ve topluluk görüşleri. Yatırım tavsiyesi değildir. Kripto, özellikle memecoinler, sıfıra inebilir.',
   demo: 'DEMO',
-  offline: 'Çevrim dışı — örnek veriler',
+  offline: 'Piyasa verisi sınırlı — Callout sunucusundan fiyatlar',
   pending: 'Açık',
   entry: 'Giriş',
   target: 'Hedef',
