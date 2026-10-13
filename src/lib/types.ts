@@ -28,4 +28,9 @@ export type Call = {
   targetPrice?: number;
   timeframe: Timeframe;
   createdAt: number;
+  expiresAt: number;
+  status: CallStatus;
+  exitPrice?: number;
 };
+
+export type CallStatus = 'open' | 'hit' | 'miss' | 'void';

@@ -31,3 +31,12 @@ export function formatPercent(value: number): string {
   const sign = value > 0 ? '+' : '';
   return `${sign}${value.toFixed(2)}%`;
 }
+
+/** Compact time left until a deadline: "6d", "5h", "12m". */
+export function formatTimeLeft(until: number, now = Date.now()): string {
+  const ms = Math.max(0, until - now);
+  const minutes = Math.floor(ms / 60000);
+  if (minutes >= 60 * 24) return `${Math.floor(minutes / (60 * 24))}d`;
+  if (minutes >= 60) return `${Math.floor(minutes / 60)}h`;
+  return `${Math.max(1, minutes)}m`;
+}

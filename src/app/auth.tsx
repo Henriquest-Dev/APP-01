@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import { ChevronLeft, Eye, EyeOff, Lock, Mail, UserRound, type LucideIcon } from 'lucide-react-native';
 import { useState } from 'react';
 import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -19,7 +20,7 @@ import { Screen } from '@/components/screen';
 import { Segmented } from '@/components/segmented';
 import { Txt } from '@/components/text';
 import { strings } from '@/i18n';
-import { useSession } from '@/state/session';
+import { useSession, type AuthError } from '@/state/session';
 import { colors, fonts, motion, radius, space } from '@/theme';
 
 type Mode = 'signUp' | 'signIn';
@@ -28,29 +29,60 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 export default function Auth() {
   const insets = useSafeAreaInsets();
-  const { signIn } = useSession();
+  const { signIn, signUp } = useSession();
   const [mode, setMode] = useState<Mode>('signUp');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
-  const submit = () => {
+  const authMessage = (e: AuthError) =>
+    ({
+      invalidLogin: strings.authInvalidLogin,
+      emailTaken: strings.authEmailTaken,
+      checkEmail: strings.authCheckEmail,
+      network: strings.authNetwork,
+      unknown: strings.authUnknown,
+    })[e];
+
+  const submit = async () => {
+    if (busy) return;
+    setInfo(null);
     if (mode === 'signUp' && !name.trim()) return setError(strings.nameRequired);
     if (!EMAIL.test(email.trim())) return setError(strings.invalidEmail);
     if (password.length < 8) return setError(strings.shortPassword);
     setError(null);
+    setBusy(true);
     const cleanEmail = email.trim().toLowerCase();
-    signIn({ name: name.trim() || cleanEmail.split('@')[0], email: cleanEmail });
+    const result =
+      mode === 'signUp'
+        ? await signUp(name.trim(), cleanEmail, password)
+        : await signIn(cleanEmail, password);
+    setBusy(false);
+    if (result === 'checkEmail') {
+      setInfo(strings.authCheckEmail);
+      setMode('signIn');
+    } else if (result) {
+      setError(authMessage(result));
+    }
   };
 
   const footer = (
     <View style={[styles.footer, { paddingBottom: insets.bottom + space.md }]}>
-      <PressableScale accessibilityRole="button" onPress={submit} style={styles.submit}>
-        <Txt size={16} weight="semibold" color={colors.accentInk}>
-          {mode === 'signUp' ? strings.signUp : strings.signIn}
-        </Txt>
+      <PressableScale
+        accessibilityRole="button"
+        onPress={submit}
+        style={[styles.submit, busy && { opacity: 0.7 }]}>
+        {busy ? (
+          <ActivityIndicator color={colors.accentInk} />
+        ) : (
+          <Txt size={16} weight="semibold" color={colors.accentInk}>
+            {mode === 'signUp' ? strings.signUp : strings.signIn}
+          </Txt>
+        )}
       </PressableScale>
     </View>
   );
@@ -147,6 +179,13 @@ export default function Auth() {
               </Txt>
             </Animated.View>
           ) : null}
+          {info ? (
+            <Animated.View entering={FadeInDown.duration(motion.fast)} style={styles.info}>
+              <Txt size={13} color={colors.text}>
+                {info}
+              </Txt>
+            </Animated.View>
+          ) : null}
         </Animated.View>
       </Screen>
     </KeyboardAvoidingView>
@@ -208,6 +247,13 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(11, 12, 20, 0.92)',
     borderTopWidth: 1,
     borderTopColor: colors.border,
+  },
+  info: {
+    padding: space.md,
+    borderRadius: radius.md,
+    backgroundColor: colors.accentSoft,
+    borderWidth: 1,
+    borderColor: colors.accent,
   },
   submit: {
     height: 54,

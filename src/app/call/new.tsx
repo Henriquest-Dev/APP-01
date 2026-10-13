@@ -2,7 +2,15 @@ import * as Haptics from 'expo-haptics';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Check, TrendingDown, TrendingUp, X } from 'lucide-react-native';
 import { useState } from 'react';
-import { FlatList, KeyboardAvoidingView, Platform, StyleSheet, TextInput, View } from 'react-native';
+import {
+  ActivityIndicator,
+  FlatList,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  TextInput,
+  View,
+} from 'react-native';
 import Animated, { FadeInDown, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -18,7 +26,8 @@ import { strings } from '@/i18n';
 import { formatPercent, formatPrice } from '@/lib/format';
 import { isStablecoin } from '@/lib/momentum';
 import type { Direction, Timeframe } from '@/lib/types';
-import { useCalls } from '@/state/calls';
+import { useCalls, type CallError } from '@/state/calls';
+import { useSession } from '@/state/session';
 import { useMarket } from '@/state/market';
 import { colors, fonts, motion, radius, space } from '@/theme';
 
@@ -27,6 +36,9 @@ export default function NewCall() {
   const insets = useSafeAreaInsets();
   const coins = useMarket().coins.filter((c) => !isStablecoin(c) || c.id === params.coin);
   const { addCall } = useCalls();
+  const { user, signOut } = useSession();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const [picked, setPicked] = useState(params.coin);
   const coinId = picked ?? coins[0]?.id;
@@ -41,9 +53,22 @@ export default function NewCall() {
     coin && hasTarget && (direction === 'up' ? targetValue <= coin.price : targetValue >= coin.price);
   const canSubmit = !!coin && (!target.trim() || (hasTarget && !targetMismatch));
 
-  const submit = () => {
-    if (!coin || !canSubmit) return;
-    addCall({
+  const callMessage = (e: CallError) =>
+    ({
+      duplicate: strings.callDuplicate,
+      limit: strings.callLimit,
+      priceMoved: strings.callPriceMoved,
+      target: strings.callTarget,
+      account: strings.accountNeeded,
+      network: strings.authNetwork,
+      unknown: strings.callFailed,
+    })[e];
+
+  const submit = async () => {
+    if (!coin || !canSubmit || busy) return;
+    setBusy(true);
+    setError(null);
+    const result = await addCall({
       coinId: coin.id,
       symbol: coin.symbol,
       name: coin.name,
@@ -53,6 +78,12 @@ export default function NewCall() {
       targetPrice: hasTarget ? targetValue : undefined,
       timeframe,
     });
+    setBusy(false);
+    if (result) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      setError(callMessage(result));
+      return;
+    }
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     router.dismissTo('/profile');
   };
@@ -62,16 +93,40 @@ export default function NewCall() {
 
   const footer = (
     <View style={[styles.footer, { paddingBottom: insets.bottom + space.md }]}>
-      <PressableScale
-        accessibilityRole="button"
-        disabled={!canSubmit}
-        onPress={submit}
-        style={[styles.submit, !canSubmit && { opacity: 0.4 }]}>
-        <Check size={20} color={colors.accentInk} strokeWidth={2.4} />
-        <Txt size={16} weight="semibold" color={colors.accentInk}>
-          {strings.makeCall}
+      {error ? (
+        <Txt size={13} color={colors.down} style={{ textAlign: 'center', marginBottom: space.sm }}>
+          {error}
         </Txt>
-      </PressableScale>
+      ) : null}
+      {user ? (
+        <PressableScale
+          accessibilityRole="button"
+          disabled={!canSubmit || busy}
+          onPress={submit}
+          style={[styles.submit, (!canSubmit || busy) && { opacity: 0.4 }]}>
+          {busy ? (
+            <ActivityIndicator color={colors.accentInk} />
+          ) : (
+            <>
+              <Check size={20} color={colors.accentInk} strokeWidth={2.4} />
+              <Txt size={16} weight="semibold" color={colors.accentInk}>
+                {strings.makeCall}
+              </Txt>
+            </>
+          )}
+        </PressableScale>
+      ) : (
+        <>
+          <Txt size={13} color={colors.textMuted} style={{ textAlign: 'center', marginBottom: space.sm }}>
+            {strings.accountNeededText}
+          </Txt>
+          <PressableScale accessibilityRole="button" onPress={signOut} style={styles.submit}>
+            <Txt size={16} weight="semibold" color={colors.accentInk}>
+              {strings.accountNeeded}
+            </Txt>
+          </PressableScale>
+        </>
+      )}
     </View>
   );
 

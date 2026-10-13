@@ -89,3 +89,12 @@ Aumenta `expo.android.versionCode` (1 → 2 → 3…) e `expo.version` no `app.j
 
 Os preços vêm por agora diretamente da API pública da CoinGecko (atualização a cada 60 s). O consenso da
 comunidade e o ranking são **dados de demonstração** (marcados "DEMO") até existir o backend.
+
+## Backend (Supabase, plano grátis)
+
+- `supabase/schema.sql` cria tudo: perfis, calls, consenso, ranking, preços e a resolução automática.
+  Corre-o uma vez em **Supabase → SQL Editor** (pode ser corrido de novo sem perder dados).
+- Preços do servidor: API pública da MEXC (grátis, sem chave), atualizados a cada 2 minutos por `pg_cron`.
+- As calls são resolvidas automaticamente: alvo atingido → acerto imediato; no prazo sem alvo → pela
+  direção do movimento.
+- `.env` tem só valores públicos (URL e publishable key). Nunca coloques aqui a secret key.

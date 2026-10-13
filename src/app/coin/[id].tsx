@@ -31,10 +31,10 @@ import { Segmented } from '@/components/segmented';
 import { Txt } from '@/components/text';
 import { strings } from '@/i18n';
 import { fetchChart, fetchCoin, type ChartRange } from '@/lib/api';
-import { demoConsensus } from '@/lib/demo';
 import { formatCompact, formatPrice } from '@/lib/format';
 import { isStablecoin, momentumScore } from '@/lib/momentum';
 import type { Coin } from '@/lib/types';
+import { useConsensus } from '@/hooks/use-consensus';
 import { useCoin } from '@/state/market';
 import { colors, motion, radius, space } from '@/theme';
 
@@ -42,6 +42,7 @@ export default function CoinScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
   const cached = useCoin(id);
+  const consensus = useConsensus(id);
   const [fetched, setFetched] = useState<Coin>();
   const coin = cached ?? fetched;
 
@@ -92,7 +93,6 @@ export default function CoinScreen() {
 
   const series = chart && chart.length > 1 ? chart : coin.sparkline;
   const rising = series.length > 1 ? series[series.length - 1] >= series[0] : coin.change24h >= 0;
-  const consensus = demoConsensus(coin.id);
   const score = momentumScore(coin);
   const dayRange =
     coin.high24h > coin.low24h ? (coin.price - coin.low24h) / (coin.high24h - coin.low24h) : 0.5;
@@ -151,9 +151,15 @@ export default function CoinScreen() {
           <CardTitle
             icon={Users}
             title={strings.community}
-            right={`${strings.demo} · ${consensus.votes} ${strings.calls}`}
+            right={consensus && consensus.total > 0 ? `${consensus.total} ${strings.calls}` : undefined}
           />
-          <ConsensusBar up={consensus.up} />
+          {consensus && consensus.total > 0 ? (
+            <ConsensusBar up={Math.round((consensus.up / consensus.total) * 100)} />
+          ) : (
+            <Txt size={14} color={colors.textMuted}>
+              {consensus ? strings.beFirst : '…'}
+            </Txt>
+          )}
         </Glass>
       </Animated.View>
 
@@ -215,7 +221,7 @@ function CardTitle({ icon: Icon, title, right }: { icon: LucideIcon; title: stri
         </Txt>
       </View>
       {right ? (
-        <Txt size={11} weight="semibold" color={colors.warn}>
+        <Txt size={11} weight="semibold" color={colors.textMuted}>
           {right}
         </Txt>
       ) : null}

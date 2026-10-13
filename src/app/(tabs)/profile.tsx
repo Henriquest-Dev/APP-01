@@ -10,7 +10,8 @@ import { Glass } from '@/components/glass';
 import { Screen } from '@/components/screen';
 import { Txt } from '@/components/text';
 import { strings } from '@/i18n';
-import { formatPercent, formatPrice } from '@/lib/format';
+import { formatPercent, formatPrice, formatTimeLeft } from '@/lib/format';
+import { callStats } from '@/lib/stats';
 import { useCalls } from '@/state/calls';
 import { useMarket } from '@/state/market';
 import { useSession } from '@/state/session';
@@ -21,6 +22,7 @@ export default function Profile() {
   const { calls } = useCalls();
   const { coins } = useMarket();
   const { user, signOut } = useSession();
+  const stats = callStats(calls);
 
   return (
     <Screen>
@@ -40,9 +42,9 @@ export default function Profile() {
       </View>
 
       <View style={styles.stats}>
-        <Stat label={strings.callsMade} value={String(calls.length)} />
-        <Stat label={strings.hitRate} value="—" />
-        <Stat label={strings.streak} value="—" />
+        <Stat label={strings.callsMade} value={String(stats.total)} />
+        <Stat label={strings.hitRate} value={stats.hitRate === null ? '—' : `${stats.hitRate}%`} />
+        <Stat label={strings.streak} value={stats.streak ? String(stats.streak) : '—'} />
       </View>
 
       <Glass style={styles.pro}>
@@ -65,16 +67,40 @@ export default function Profile() {
           style={{ paddingHorizontal: space.lg, paddingTop: space.lg, paddingBottom: space.sm }}>
           {strings.myCalls}
         </Txt>
-        {calls.length === 0 ? (
+        {!user ? (
+          <View style={styles.cta}>
+            <Txt size={15} weight="semibold">
+              {strings.accountNeeded}
+            </Txt>
+            <Txt size={13} color={colors.textMuted}>
+              {strings.accountNeededText}
+            </Txt>
+            <PressableScale accessibilityRole="button" onPress={signOut} style={styles.ctaBtn}>
+              <Txt size={14} weight="semibold" color={colors.accentInk}>
+                {strings.signUp}
+              </Txt>
+            </PressableScale>
+          </View>
+        ) : calls.length === 0 ? (
           <Txt size={14} color={colors.textMuted} style={styles.empty}>
             {strings.noCalls}
           </Txt>
         ) : (
           calls.map((call, i) => {
-            const now = coins.find((c) => c.id === call.coinId)?.price ?? call.entryPrice;
+            const open = call.status === 'open';
+            const now = open
+              ? (coins.find((c) => c.id === call.coinId)?.price ?? call.entryPrice)
+              : (call.exitPrice ?? call.entryPrice);
             const move = ((now - call.entryPrice) / call.entryPrice) * 100;
             const up = call.direction === 'up';
-            const winning = up ? move >= 0 : move <= 0;
+            const winning = open ? (up ? move >= 0 : move <= 0) : call.status === 'hit';
+            const statusLabel = open
+              ? `${strings.endsIn} ${formatTimeLeft(call.expiresAt)}`
+              : call.status === 'hit'
+                ? strings.statusHit
+                : call.status === 'miss'
+                  ? strings.statusMiss
+                  : strings.statusVoid;
             const Icon = up ? TrendingUp : TrendingDown;
             return (
               <Animated.View
@@ -103,9 +129,37 @@ export default function Profile() {
                   <Txt size={15} weight="semibold" color={winning ? colors.up : colors.down} numeric>
                     {formatPercent(move)}
                   </Txt>
-                  <Txt size={12} color={colors.textMuted}>
-                    {strings.pending}
-                  </Txt>
+                  {open ? (
+                    <Txt size={12} color={colors.textMuted}>
+                      {statusLabel}
+                    </Txt>
+                  ) : (
+                    <View
+                      style={[
+                        styles.status,
+                        {
+                          backgroundColor:
+                            call.status === 'hit'
+                              ? colors.upSoft
+                              : call.status === 'miss'
+                                ? colors.downSoft
+                                : colors.surfaceRaised,
+                        },
+                      ]}>
+                      <Txt
+                        size={11}
+                        weight="semibold"
+                        color={
+                          call.status === 'hit'
+                            ? colors.up
+                            : call.status === 'miss'
+                              ? colors.down
+                              : colors.textMuted
+                        }>
+                        {statusLabel}
+                      </Txt>
+                    </View>
+                  )}
                 </View>
               </Animated.View>
             );
@@ -176,6 +230,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.lg,
     paddingVertical: 11,
   },
+  cta: { paddingHorizontal: space.lg, paddingBottom: space.lg, gap: 6 },
+  ctaBtn: {
+    alignSelf: 'flex-start',
+    marginTop: space.sm,
+    paddingHorizontal: space.lg,
+    paddingVertical: 10,
+    borderRadius: radius.pill,
+    backgroundColor: colors.accent,
+  },
+  status: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: radius.pill },
   signOut: {
     flexDirection: 'row',
     gap: 8,

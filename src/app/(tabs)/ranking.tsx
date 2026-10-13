@@ -1,96 +1,119 @@
-import { Crown, Medal } from 'lucide-react-native';
-import { StyleSheet, View } from 'react-native';
+import { Crown, Medal, Trophy } from 'lucide-react-native';
+import { ActivityIndicator, RefreshControl, StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { Glass } from '@/components/glass';
 import { Screen } from '@/components/screen';
 import { SectionHeader } from '@/components/section-header';
 import { Txt } from '@/components/text';
+import { useLeaderboard } from '@/hooks/use-leaderboard';
 import { strings } from '@/i18n';
-import { demoLeaderboard } from '@/lib/demo';
+import { useSession } from '@/state/session';
 import { colors, motion, radius, space } from '@/theme';
 
 const PODIUM = ['#FFD66B', '#C9CEDC', '#E3A574'];
 
 export default function Ranking() {
-  const [first, ...rest] = demoLeaderboard;
+  const { leaders, refreshing, reload } = useLeaderboard();
+  const { user } = useSession();
+  const [first, ...rest] = leaders ?? [];
+
   return (
-    <Screen>
+    <Screen
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={reload} tintColor={colors.accent} />
+      }>
       <Txt size={28} weight="semibold" style={{ paddingHorizontal: space.lg }}>
         {strings.ranking}
       </Txt>
       <View style={{ marginTop: space.lg }}>
-        <SectionHeader title={strings.rankingSubtitle} badge={strings.demo} />
+        <SectionHeader title={strings.rankingSubtitle} />
       </View>
 
-      <Animated.View entering={FadeInDown.duration(motion.base)}>
-        <Glass style={styles.hero}>
-          <View style={styles.heroIcon}>
-            <Crown size={26} color={PODIUM[0]} strokeWidth={1.9} />
-          </View>
-          <View style={{ flex: 1, gap: 2 }}>
-            <Txt size={18} weight="semibold">
-              @{first.name}
-            </Txt>
-            <Txt size={13} color={colors.textMuted}>
-              {first.calls} {strings.calls}
-            </Txt>
-          </View>
-          <View style={{ alignItems: 'flex-end' }}>
-            <Txt size={30} weight="semibold" color={colors.up} numeric>
-              {first.accuracy}%
-            </Txt>
-            <Txt size={12} color={colors.textMuted}>
-              {strings.accuracy}
-            </Txt>
-          </View>
+      {leaders === null ? (
+        <ActivityIndicator color={colors.accent} style={{ marginTop: space.xxl }} />
+      ) : !first ? (
+        <Glass style={styles.empty}>
+          <Trophy size={32} color={colors.textMuted} strokeWidth={1.6} />
+          <Txt size={14} color={colors.textMuted} style={{ textAlign: 'center' }}>
+            {strings.noRanking}
+          </Txt>
         </Glass>
-      </Animated.View>
-
-      <Glass style={styles.list}>
-        {rest.map((u, i) => (
-          <Animated.View
-            key={u.name}
-            entering={FadeInDown.delay((i + 1) * motion.stagger).duration(motion.base)}
-            style={styles.row}>
-            <View style={styles.rank}>
-              {i < 2 ? (
-                <Medal size={18} color={PODIUM[i + 1]} strokeWidth={2} />
-              ) : (
-                <Txt size={14} weight="semibold" color={colors.textMuted} numeric>
-                  {i + 2}
-                </Txt>
-              )}
-            </View>
-            <View style={styles.avatar}>
-              <Txt size={15} weight="semibold">
-                {u.name[0].toUpperCase()}
-              </Txt>
-            </View>
-            <View style={{ flex: 1, gap: 2 }}>
-              <Txt size={15} weight="semibold">
-                @{u.name}
-              </Txt>
-              <Txt size={12} color={colors.textMuted}>
-                {u.calls} {strings.calls}
-              </Txt>
-            </View>
-            <View style={{ alignItems: 'flex-end', gap: 6, width: 72 }}>
-              <Txt size={15} weight="semibold" numeric>
-                {u.accuracy}%
-              </Txt>
-              <View style={styles.barTrack}>
-                <View style={[styles.barFill, { width: `${u.accuracy}%` }]} />
+      ) : (
+        <>
+          <Animated.View entering={FadeInDown.duration(motion.base)}>
+            <Glass style={[styles.hero, first.userId === user?.id && styles.me]}>
+              <View style={styles.heroIcon}>
+                <Crown size={26} color={PODIUM[0]} strokeWidth={1.9} />
               </View>
-            </View>
+              <View style={{ flex: 1, gap: 2 }}>
+                <Txt size={18} weight="semibold" numberOfLines={1}>
+                  @{first.username}
+                </Txt>
+                <Txt size={13} color={colors.textMuted}>
+                  {first.hits}/{first.resolved} {strings.calls}
+                </Txt>
+              </View>
+              <View style={{ alignItems: 'flex-end' }}>
+                <Txt size={30} weight="semibold" color={colors.up} numeric>
+                  {first.accuracy}%
+                </Txt>
+                <Txt size={12} color={colors.textMuted}>
+                  {strings.accuracy}
+                </Txt>
+              </View>
+            </Glass>
           </Animated.View>
-        ))}
-      </Glass>
+
+          {rest.length > 0 ? (
+            <Glass style={styles.list}>
+              {rest.map((u, i) => (
+                <Animated.View
+                  key={u.userId}
+                  entering={FadeInDown.delay((i + 1) * motion.stagger).duration(motion.base)}
+                  style={[styles.row, u.userId === user?.id && styles.meRow]}>
+                  <View style={styles.rank}>
+                    {i < 2 ? (
+                      <Medal size={18} color={PODIUM[i + 1]} strokeWidth={2} />
+                    ) : (
+                      <Txt size={14} weight="semibold" color={colors.textMuted} numeric>
+                        {i + 2}
+                      </Txt>
+                    )}
+                  </View>
+                  <View style={styles.avatar}>
+                    <Txt size={15} weight="semibold">
+                      {u.username[0]?.toUpperCase()}
+                    </Txt>
+                  </View>
+                  <View style={{ flex: 1, gap: 2 }}>
+                    <Txt size={15} weight="semibold" numberOfLines={1}>
+                      @{u.username}
+                    </Txt>
+                    <Txt size={12} color={colors.textMuted}>
+                      {u.hits}/{u.resolved} {strings.calls}
+                    </Txt>
+                  </View>
+                  <View style={{ alignItems: 'flex-end', gap: 6, width: 72 }}>
+                    <Txt size={15} weight="semibold" numeric>
+                      {u.accuracy}%
+                    </Txt>
+                    <View style={styles.barTrack}>
+                      <View style={[styles.barFill, { width: `${u.accuracy}%` }]} />
+                    </View>
+                  </View>
+                </Animated.View>
+              ))}
+            </Glass>
+          ) : null}
+        </>
+      )}
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
+  empty: { marginHorizontal: space.lg, padding: space.xl, gap: space.md, alignItems: 'center' },
   hero: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -98,6 +121,7 @@ const styles = StyleSheet.create({
     marginHorizontal: space.lg,
     padding: space.xl,
   },
+  me: { borderColor: colors.accent },
   heroIcon: {
     width: 52,
     height: 52,
@@ -114,6 +138,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.lg,
     paddingVertical: space.md,
   },
+  meRow: { backgroundColor: colors.accentSoft },
   rank: { width: 22, alignItems: 'center' },
   avatar: {
     width: 38,
