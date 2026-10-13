@@ -266,4 +266,10 @@ export const pt: Strings = {
   liveNotice: 'A transmissão e o seu conteúdo pertencem ao anfitrião e à plataforma, não ao Callout.',
   liveMine: 'A tua live está em curso',
   liveBy: 'Por',
+  aiTitle: 'Análise por IA',
+  aiGenerate: 'Gerar análise',
+  aiLoading: 'A ler o mercado…',
+  aiNote: 'Gerada por IA a partir de dados de mercado. Apenas informação, não é aconselhamento financeiro.',
+  aiLimit: 'Limite diário de IA atingido. Tenta amanhã.',
+  aiError: 'A IA está indisponível agora. Tenta daqui a pouco.',
 };

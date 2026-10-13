@@ -22,6 +22,7 @@ import { CoinAvatar } from '@/components/coin-avatar';
 import { ConsensusBar } from '@/components/consensus-bar';
 import { Glass } from '@/components/glass';
 import { IconButton } from '@/components/icon-button';
+import { AiAnalysis } from '@/components/ai-analysis';
 import { MomentumMeter, momentumColor } from '@/components/momentum-meter';
 import { PressableScale } from '@/components/pressable-scale';
 import { Price } from '@/components/price';
@@ -187,6 +188,10 @@ export default function CoinScreen() {
         </Animated.View>
       )}
 
+      <Animated.View entering={FadeInDown.delay(180).duration(motion.base)}>
+        <AiAnalysis coin={coin} series={series} />
+      </Animated.View>
+
       {coinCalls && coinCalls.length > 0 ? (
         <Animated.View entering={FadeInDown.delay(200).duration(motion.base)} style={styles.callsBlock}>
           <View style={styles.cardHead}>
@@ -222,7 +227,6 @@ export default function CoinScreen() {
           </View>
         </Glass>
       </Animated.View>
-
     </Screen>
   );
 }

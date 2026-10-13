@@ -262,4 +262,10 @@ export const zh: Strings = {
   liveNotice: '直播及其内容归主播和平台所有，而非 Callout。',
   liveMine: '你的直播进行中',
   liveBy: '主播',
+  aiTitle: 'AI 分析',
+  aiGenerate: '生成分析',
+  aiLoading: '正在解读市场…',
+  aiNote: '由 AI 根据市场数据生成。仅供参考，不构成财务建议。',
+  aiLimit: '已达今日 AI 使用上限，请明天再试。',
+  aiError: 'AI 暂时不可用，请稍后再试。',
 };

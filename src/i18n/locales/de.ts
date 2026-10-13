@@ -266,4 +266,10 @@ export const de: Strings = {
   liveNotice: 'Der Stream und sein Inhalt gehören dem Host und der Plattform, nicht Callout.',
   liveMine: 'Dein Live läuft',
   liveBy: 'Von',
+  aiTitle: 'KI-Analyse',
+  aiGenerate: 'Analyse erstellen',
+  aiLoading: 'Markt wird gelesen…',
+  aiNote: 'Von KI aus Marktdaten erstellt. Nur Information, keine Finanzberatung.',
+  aiLimit: 'Tageslimit für KI erreicht. Versuch es morgen erneut.',
+  aiError: 'Die KI ist gerade nicht verfügbar. Versuch es bald erneut.',
 };

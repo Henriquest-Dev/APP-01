@@ -265,4 +265,10 @@ export const tr: Strings = {
   liveNotice: 'Yayın ve içeriği Callout’a değil, yayıncıya ve platforma aittir.',
   liveMine: 'Canlı yayının sürüyor',
   liveBy: 'Yayıncı',
+  aiTitle: 'Yapay zekâ analizi',
+  aiGenerate: 'Analiz oluştur',
+  aiLoading: 'Piyasa okunuyor…',
+  aiNote: 'Piyasa verilerinden yapay zekâ ile üretildi. Yalnızca bilgi, finansal tavsiye değildir.',
+  aiLimit: 'Günlük yapay zekâ sınırına ulaşıldı. Yarın tekrar dene.',
+  aiError: 'Yapay zekâ şu an kullanılamıyor. Birazdan tekrar dene.',
 };

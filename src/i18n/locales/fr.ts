@@ -268,4 +268,10 @@ export const fr: Strings = {
   liveNotice: 'Le stream et son contenu appartiennent à l’hôte et à la plateforme, pas à Callout.',
   liveMine: 'Ton live est en cours',
   liveBy: 'Par',
+  aiTitle: 'Analyse par IA',
+  aiGenerate: 'Générer l’analyse',
+  aiLoading: 'Lecture du marché…',
+  aiNote: 'Généré par IA à partir de données de marché. Information uniquement, pas un conseil financier.',
+  aiLimit: 'Limite quotidienne d’IA atteinte. Réessaie demain.',
+  aiError: 'L’IA est indisponible pour le moment. Réessaie bientôt.',
 };
