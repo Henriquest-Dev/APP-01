@@ -31,6 +31,7 @@ export type Group = {
   ownerId: string | null;
   memberCount: number;
   lastMessageAt: number | null;
+  banner: string;
 };
 
 export type Message = {
@@ -77,6 +78,7 @@ function toGroup(r: any): Group {
     ownerId: r.owner_id,
     memberCount: r.member_count ?? 0,
     lastMessageAt: r.last_message_at ? Date.parse(r.last_message_at) : null,
+    banner: r.banner ?? 'violet',
   };
 }
 
@@ -128,10 +130,10 @@ export async function isMember(groupId: string, userId: string) {
   return !!data;
 }
 
-export async function createGroup(name: string, description: string, isPublic: boolean) {
+export async function createGroup(name: string, description: string, isPublic: boolean, banner = 'violet') {
   const { data, error } = await supabase
     .from('groups')
-    .insert({ name: name.trim(), description: description.trim() || null, is_public: isPublic })
+    .insert({ name: name.trim(), description: description.trim() || null, is_public: isPublic, banner })
     .select('id')
     .single();
   if (error) throw error;

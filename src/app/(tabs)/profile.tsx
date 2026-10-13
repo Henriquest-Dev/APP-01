@@ -1,17 +1,22 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ChevronRight, LogOut, Settings2, TrendingDown, TrendingUp, UserRound } from 'lucide-react-native';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { ProLogo } from '@/components/animated-logo';
 import { IconButton } from '@/components/icon-button';
 import { StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { CoinAvatar } from '@/components/coin-avatar';
+import { Badges } from '@/components/badges';
 import { Glass } from '@/components/glass';
+import { PostList } from '@/components/post-list';
+import { Segmented } from '@/components/segmented';
 import { Screen } from '@/components/screen';
 import { Txt } from '@/components/text';
 import { strings } from '@/i18n';
-import { formatPercent, formatPrice, formatTimeLeft } from '@/lib/format';
+import { badgesFor } from '@/lib/badges';
+import { fetchCard, type ProfileCard } from '@/lib/social';
+import { formatCount, formatPercent, formatPrice, formatTimeLeft } from '@/lib/format';
 import { fetchServerPrices } from '@/lib/server-prices';
 import { callStats } from '@/lib/stats';
 import { useCalls } from '@/state/calls';
@@ -27,6 +32,21 @@ export default function Profile() {
   const { user, signOut } = useSession();
   const { pro } = usePro();
   const stats = callStats(calls);
+  const [tab, setTab] = useState<'calls' | 'posts'>('calls');
+  const [notice, setNotice] = useState<string | null>(null);
+  const [card, setCard] = useState<ProfileCard | null>(null);
+  const userId = user?.id;
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!userId) return;
+      let alive = true;
+      fetchCard(userId).then((c) => alive && setCard(c));
+      return () => {
+        alive = false;
+      };
+    }, [userId]),
+  );
   const serverPrices = useServerPrices(calls.filter((c) => c.status === 'open').map((c) => c.symbol));
 
   return (
@@ -40,11 +60,32 @@ export default function Profile() {
             {user?.name ?? strings.guestName}
           </Txt>
           <Txt size={13} color={colors.textMuted}>
-            {user?.email ?? strings.memberSince}
+            {card ? `@${card.handle}` : (user?.email ?? strings.memberSince)}
           </Txt>
         </View>
         <IconButton icon={Settings2} label={strings.settings} onPress={() => router.push('/settings')} />
       </View>
+
+      {card ? (
+        <View style={styles.social}>
+          {card.bio ? <Txt size={14}>{card.bio}</Txt> : null}
+          <View style={{ flexDirection: 'row', gap: space.xl }}>
+            <Txt size={13} color={colors.textMuted}>
+              <Txt size={13} weight="bold">
+                {formatCount(card.followers)}
+              </Txt>{' '}
+              {strings.followers}
+            </Txt>
+            <Txt size={13} color={colors.textMuted}>
+              <Txt size={13} weight="bold">
+                {formatCount(card.following)}
+              </Txt>{' '}
+              {strings.followingLabel}
+            </Txt>
+          </View>
+          <Badges badges={badgesFor(card)} />
+        </View>
+      ) : null}
 
       <View style={styles.stats}>
         <Stat label={strings.callsMade} value={String(stats.total)} />
@@ -53,128 +94,153 @@ export default function Profile() {
       </View>
 
       <PressableScale scaleTo={0.98} onPress={() => router.push('/pro')}>
-      <Glass style={styles.pro}>
-        <ProLogo size={44} />
-        <View style={{ flex: 1, gap: 2 }}>
-          <Txt size={15} weight="semibold">
-            Callout Pro
-          </Txt>
-          <Txt size={12} color={colors.textMuted}>
-            {pro ? strings.proActive : strings.premiumSubtitle}
-          </Txt>
-        </View>
-        <ChevronRight size={18} color={colors.textMuted} />
-      </Glass>
+        <Glass style={styles.pro}>
+          <ProLogo size={44} />
+          <View style={{ flex: 1, gap: 2 }}>
+            <Txt size={15} weight="semibold">
+              Callout Pro
+            </Txt>
+            <Txt size={12} color={colors.textMuted}>
+              {pro ? strings.proActive : strings.premiumSubtitle}
+            </Txt>
+          </View>
+          <ChevronRight size={18} color={colors.textMuted} />
+        </Glass>
       </PressableScale>
 
-      <Glass style={styles.list}>
-        <Txt
-          size={16}
-          weight="semibold"
-          style={{ paddingHorizontal: space.lg, paddingTop: space.lg, paddingBottom: space.sm }}>
-          {strings.myCalls}
-        </Txt>
-        {!user ? (
-          <View style={styles.cta}>
-            <Txt size={15} weight="semibold">
-              {strings.accountNeeded}
+      {user ? (
+        <View style={{ marginBottom: space.md }}>
+          <Segmented<'calls' | 'posts'>
+            size="sm"
+            value={tab}
+            onChange={setTab}
+            options={[
+              { value: 'calls', label: strings.myCalls },
+              { value: 'posts', label: strings.posts },
+            ]}
+          />
+        </View>
+      ) : null}
+
+      {user && tab === 'posts' ? (
+        <>
+          <PostList authorId={user.id} onNotice={setNotice} />
+          {notice ? (
+            <Txt size={12} color={colors.textMuted} style={{ textAlign: 'center', marginTop: space.md }}>
+              {notice}
             </Txt>
-            <Txt size={13} color={colors.textMuted}>
-              {strings.accountNeededText}
-            </Txt>
-            <PressableScale accessibilityRole="button" onPress={signOut} style={styles.ctaBtn}>
-              <Txt size={14} weight="semibold" color={colors.accentInk}>
-                {strings.signUp}
-              </Txt>
-            </PressableScale>
-          </View>
-        ) : calls.length === 0 ? (
-          <Txt size={14} color={colors.textMuted} style={styles.empty}>
-            {strings.noCalls}
+          ) : null}
+        </>
+      ) : (
+        <Glass style={styles.list}>
+          <Txt
+            size={16}
+            weight="semibold"
+            style={{ paddingHorizontal: space.lg, paddingTop: space.lg, paddingBottom: space.sm }}>
+            {strings.myCalls}
           </Txt>
-        ) : (
-          calls.map((call, i) => {
-            const open = call.status === 'open';
-            const now = open
-              ? (serverPrices[call.symbol] ??
-                coins.find((c) => c.id === call.coinId)?.price ??
-                call.entryPrice)
-              : (call.exitPrice ?? call.entryPrice);
-            const move = ((now - call.entryPrice) / call.entryPrice) * 100;
-            const up = call.direction === 'up';
-            const winning = open ? (up ? move >= 0 : move <= 0) : call.status === 'hit';
-            const statusLabel = open
-              ? `${strings.endsIn} ${formatTimeLeft(call.expiresAt)}`
-              : call.status === 'hit'
-                ? strings.statusHit
-                : call.status === 'miss'
-                  ? strings.statusMiss
-                  : strings.statusVoid;
-            const Icon = up ? TrendingUp : TrendingDown;
-            return (
-              <Animated.View
-                key={call.id}
-                entering={FadeInDown.delay(i * motion.stagger).duration(motion.base)}
-                style={styles.call}>
-                <CoinAvatar uri={call.image} symbol={call.symbol} size={38} />
-                <View style={{ flex: 1, gap: 3 }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                    <Txt size={15} weight="semibold">
-                      {call.symbol}
-                    </Txt>
-                    <View style={[styles.tag, { backgroundColor: up ? colors.upSoft : colors.downSoft }]}>
-                      <Icon size={12} color={up ? colors.up : colors.down} strokeWidth={2.2} />
-                      <Txt size={11} weight="semibold" color={up ? colors.up : colors.down}>
-                        {call.timeframe}
+          {!user ? (
+            <View style={styles.cta}>
+              <Txt size={15} weight="semibold">
+                {strings.accountNeeded}
+              </Txt>
+              <Txt size={13} color={colors.textMuted}>
+                {strings.accountNeededText}
+              </Txt>
+              <PressableScale accessibilityRole="button" onPress={signOut} style={styles.ctaBtn}>
+                <Txt size={14} weight="semibold" color={colors.accentInk}>
+                  {strings.signUp}
+                </Txt>
+              </PressableScale>
+            </View>
+          ) : calls.length === 0 ? (
+            <Txt size={14} color={colors.textMuted} style={styles.empty}>
+              {strings.noCalls}
+            </Txt>
+          ) : (
+            calls.map((call, i) => {
+              const open = call.status === 'open';
+              const now = open
+                ? (serverPrices[call.symbol] ??
+                  coins.find((c) => c.id === call.coinId)?.price ??
+                  call.entryPrice)
+                : (call.exitPrice ?? call.entryPrice);
+              const move = ((now - call.entryPrice) / call.entryPrice) * 100;
+              const up = call.direction === 'up';
+              const winning = open ? (up ? move >= 0 : move <= 0) : call.status === 'hit';
+              const statusLabel = open
+                ? `${strings.endsIn} ${formatTimeLeft(call.expiresAt)}`
+                : call.status === 'hit'
+                  ? strings.statusHit
+                  : call.status === 'miss'
+                    ? strings.statusMiss
+                    : strings.statusVoid;
+              const Icon = up ? TrendingUp : TrendingDown;
+              return (
+                <Animated.View
+                  key={call.id}
+                  entering={FadeInDown.delay(i * motion.stagger).duration(motion.base)}
+                  style={styles.call}>
+                  <CoinAvatar uri={call.image} symbol={call.symbol} size={38} />
+                  <View style={{ flex: 1, gap: 3 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <Txt size={15} weight="semibold">
+                        {call.symbol}
                       </Txt>
+                      <View style={[styles.tag, { backgroundColor: up ? colors.upSoft : colors.downSoft }]}>
+                        <Icon size={12} color={up ? colors.up : colors.down} strokeWidth={2.2} />
+                        <Txt size={11} weight="semibold" color={up ? colors.up : colors.down}>
+                          {call.timeframe}
+                        </Txt>
+                      </View>
                     </View>
-                  </View>
-                  <Txt size={12} color={colors.textMuted} numeric>
-                    {strings.entry} {formatPrice(call.entryPrice)}
-                    {call.targetPrice ? ` · ${strings.target} ${formatPrice(call.targetPrice)}` : ''}
-                  </Txt>
-                </View>
-                <View style={{ alignItems: 'flex-end', gap: 3 }}>
-                  <Txt size={15} weight="semibold" color={winning ? colors.up : colors.down} numeric>
-                    {formatPercent(move)}
-                  </Txt>
-                  {open ? (
-                    <Txt size={12} color={colors.textMuted}>
-                      {statusLabel}
+                    <Txt size={12} color={colors.textMuted} numeric>
+                      {strings.entry} {formatPrice(call.entryPrice)}
+                      {call.targetPrice ? ` · ${strings.target} ${formatPrice(call.targetPrice)}` : ''}
                     </Txt>
-                  ) : (
-                    <View
-                      style={[
-                        styles.status,
-                        {
-                          backgroundColor:
-                            call.status === 'hit'
-                              ? colors.upSoft
-                              : call.status === 'miss'
-                                ? colors.downSoft
-                                : colors.surfaceRaised,
-                        },
-                      ]}>
-                      <Txt
-                        size={11}
-                        weight="semibold"
-                        color={
-                          call.status === 'hit'
-                            ? colors.up
-                            : call.status === 'miss'
-                              ? colors.down
-                              : colors.textMuted
-                        }>
+                  </View>
+                  <View style={{ alignItems: 'flex-end', gap: 3 }}>
+                    <Txt size={15} weight="semibold" color={winning ? colors.up : colors.down} numeric>
+                      {formatPercent(move)}
+                    </Txt>
+                    {open ? (
+                      <Txt size={12} color={colors.textMuted}>
                         {statusLabel}
                       </Txt>
-                    </View>
-                  )}
-                </View>
-              </Animated.View>
-            );
-          })
-        )}
-      </Glass>
+                    ) : (
+                      <View
+                        style={[
+                          styles.status,
+                          {
+                            backgroundColor:
+                              call.status === 'hit'
+                                ? colors.upSoft
+                                : call.status === 'miss'
+                                  ? colors.downSoft
+                                  : colors.surfaceRaised,
+                          },
+                        ]}>
+                        <Txt
+                          size={11}
+                          weight="semibold"
+                          color={
+                            call.status === 'hit'
+                              ? colors.up
+                              : call.status === 'miss'
+                                ? colors.down
+                                : colors.textMuted
+                          }>
+                          {statusLabel}
+                        </Txt>
+                      </View>
+                    )}
+                  </View>
+                </Animated.View>
+              );
+            })
+          )}
+        </Glass>
+      )}
 
       <PressableScale accessibilityRole="button" onPress={signOut} style={styles.signOut} scaleTo={0.97}>
         <LogOut size={17} color={colors.down} strokeWidth={2} />
@@ -200,6 +266,7 @@ function Stat({ label, value }: { label: string; value: string }) {
 }
 
 const styles = StyleSheet.create({
+  social: { gap: space.sm, marginBottom: space.lg },
   head: { flexDirection: 'row', alignItems: 'center', gap: space.lg, paddingHorizontal: space.lg },
   avatar: {
     width: 60,

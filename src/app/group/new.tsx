@@ -11,6 +11,8 @@ import { Screen } from '@/components/screen';
 import { Segmented } from '@/components/segmented';
 import { Txt } from '@/components/text';
 import { strings } from '@/i18n';
+import { GroupBanner } from '@/components/group-banner';
+import { BANNER_KEYS, bannerColors, type BannerKey } from '@/lib/banners';
 import { createGroup } from '@/lib/community';
 import { colors, fonts, radius, space } from '@/theme';
 
@@ -21,6 +23,7 @@ export default function NewGroup() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [privacy, setPrivacy] = useState<Privacy>('public');
+  const [banner, setBanner] = useState<BannerKey>('violet');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,7 +35,7 @@ export default function NewGroup() {
     setBusy(true);
     setError(null);
     try {
-      const id = await createGroup(name, description, privacy === 'public');
+      const id = await createGroup(name, description, privacy === 'public', banner);
       haptic.success();
       router.replace({ pathname: '/group/[id]', params: { id } });
     } catch {
@@ -73,6 +76,27 @@ export default function NewGroup() {
             <IconButton icon={X} label="Close" onPress={() => router.back()} />
           </View>
         }>
+        <View style={{ marginHorizontal: space.lg, borderRadius: radius.lg, overflow: 'hidden' }}>
+          <GroupBanner banner={banner} name={name} />
+        </View>
+        <Label text={strings.groupBanner} />
+        <View style={styles.swatches}>
+          {BANNER_KEYS.map((k) => (
+            <PressableScale
+              key={k}
+              accessibilityRole="button"
+              accessibilityLabel={k}
+              scaleTo={0.9}
+              onPress={() => setBanner(k)}
+              style={[
+                styles.swatch,
+                { backgroundColor: bannerColors(k)[0] },
+                banner === k && styles.swatchOn,
+              ]}>
+              {null}
+            </PressableScale>
+          ))}
+        </View>
         <Label text={strings.groupName} />
         <TextInput
           value={name}
@@ -134,6 +158,9 @@ function Label({ text }: { text: string }) {
 }
 
 const styles = StyleSheet.create({
+  swatches: { flexDirection: 'row', gap: space.md, paddingHorizontal: space.lg },
+  swatch: { width: 40, height: 40, borderRadius: 20, borderWidth: 2, borderColor: 'transparent' },
+  swatchOn: { borderColor: '#FFFFFF' },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',

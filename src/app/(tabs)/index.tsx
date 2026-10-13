@@ -7,7 +7,6 @@ import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { AreaChart } from '@/components/area-chart';
 import { ChangePill } from '@/components/change-pill';
 import { CoinRow } from '@/components/coin-row';
-import { Disclaimer } from '@/components/disclaimer';
 import { Glass } from '@/components/glass';
 import { IconButton } from '@/components/icon-button';
 import { AnimatedLogo, ProLogo } from '@/components/animated-logo';
@@ -198,7 +197,6 @@ export default function Home() {
         </>
       )}
 
-      <Disclaimer />
     </Screen>
   );
 }

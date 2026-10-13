@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
 
 import { CoinRow } from '@/components/coin-row';
-import { Disclaimer } from '@/components/disclaimer';
 import { Glass } from '@/components/glass';
 import { Screen } from '@/components/screen';
 import { Txt } from '@/components/text';
@@ -57,7 +56,6 @@ export default function Markets() {
           <CoinRow key={c.id} {...c} index={i} momentum={isStablecoin(c) ? undefined : momentumScore(c)} />
         ))}
       </Glass>
-      <Disclaimer />
     </Screen>
   );
 }

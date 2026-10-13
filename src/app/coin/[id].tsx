@@ -20,7 +20,6 @@ import { AreaChart } from '@/components/area-chart';
 import { ChangePill } from '@/components/change-pill';
 import { CoinAvatar } from '@/components/coin-avatar';
 import { ConsensusBar } from '@/components/consensus-bar';
-import { Disclaimer } from '@/components/disclaimer';
 import { Glass } from '@/components/glass';
 import { IconButton } from '@/components/icon-button';
 import { MomentumMeter, momentumColor } from '@/components/momentum-meter';
@@ -224,7 +223,6 @@ export default function CoinScreen() {
         </Glass>
       </Animated.View>
 
-      <Disclaimer />
     </Screen>
   );
 }

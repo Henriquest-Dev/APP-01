@@ -17,10 +17,21 @@ import { PressableScale } from './pressable-scale';
 import { Txt } from './text';
 
 /** Posts tab of the community: composer button + live list. */
-export function PostList({ onNotice }: { onNotice: (text: string) => void }) {
+export function PostList({
+  onNotice,
+  authorId,
+}: {
+  onNotice: (text: string) => void;
+  /** Show only this person's posts and reposts (profile pages), without the composer. */
+  authorId?: string;
+}) {
   const { user } = useSession();
   const { isBlocked, block } = useBlocks();
-  const { posts, liked, reposted, saved, toggleLike, toggleRepost, toggleSave, remove } = usePosts(user?.id);
+  const { posts, liked, reposted, saved, toggleLike, toggleRepost, toggleSave, remove } = usePosts(
+    user?.id,
+    true,
+    authorId,
+  );
 
   const visible = (posts ?? []).filter(
     (p) => !isBlocked(p.userId) && !(p.repostedBy && isBlocked(p.repostedBy.id)),
@@ -31,32 +42,34 @@ export function PostList({ onNotice }: { onNotice: (text: string) => void }) {
 
   return (
     <View>
-      <View style={styles.composeRow}>
-        <PressableScale
-          accessibilityRole="button"
-          onPress={() => (user ? router.push('/post/new') : onNotice(strings.accountNeeded))}
-          style={styles.compose}>
-          <View style={styles.composeIcon}>
-            <ImagePlus size={18} color={colors.accentInk} strokeWidth={2.2} />
-          </View>
-          <Txt size={15} color={colors.textMuted} numberOfLines={1} style={{ flex: 1 }}>
-            {strings.newPostPrompt}
-          </Txt>
-        </PressableScale>
-        <IconButton
-          icon={Bookmark}
-          label={strings.savedPosts}
-          onPress={() => (user ? router.push('/saved') : onNotice(strings.accountNeeded))}
-          size={52}
-        />
-      </View>
+      {authorId ? null : (
+        <View style={styles.composeRow}>
+          <PressableScale
+            accessibilityRole="button"
+            onPress={() => (user ? router.push('/post/new') : onNotice(strings.accountNeeded))}
+            style={styles.compose}>
+            <View style={styles.composeIcon}>
+              <ImagePlus size={18} color={colors.accentInk} strokeWidth={2.2} />
+            </View>
+            <Txt size={15} color={colors.textMuted} numberOfLines={1} style={{ flex: 1 }}>
+              {strings.newPostPrompt}
+            </Txt>
+          </PressableScale>
+          <IconButton
+            icon={Bookmark}
+            label={strings.savedPosts}
+            onPress={() => (user ? router.push('/saved') : onNotice(strings.accountNeeded))}
+            size={52}
+          />
+        </View>
+      )}
 
       {posts === null ? (
         <ActivityIndicator color={colors.accent} style={{ marginTop: space.xxl }} />
       ) : visible.length === 0 ? (
         <Glass style={styles.empty}>
           <Txt size={14} color={colors.textMuted} style={{ textAlign: 'center' }}>
-            {strings.noPosts}
+            {authorId ? strings.nothingYet : strings.noPosts}
           </Txt>
         </Glass>
       ) : (

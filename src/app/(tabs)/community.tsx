@@ -1,10 +1,11 @@
 import { router, useFocusEffect } from 'expo-router';
-import { ChevronRight, Globe, KeyRound, Lock, Plus, Users } from 'lucide-react-native';
+import { ChevronRight, Globe, KeyRound, Lock, Plus, Search, Users } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, StyleSheet, TextInput, View } from 'react-native';
 import Animated, { FadeInDown, FadeInUp, FadeOut, LinearTransition } from 'react-native-reanimated';
 
 import { FeedCallCard } from '@/components/feed-call-card';
+import { IconButton } from '@/components/icon-button';
 import { Glass } from '@/components/glass';
 import { LiveDot } from '@/components/live-dot';
 import { PostList } from '@/components/post-list';
@@ -13,6 +14,7 @@ import { Screen } from '@/components/screen';
 import { Segmented } from '@/components/segmented';
 import { Txt } from '@/components/text';
 import { useCallFeed } from '@/hooks/use-call-feed';
+import { bannerColors } from '@/lib/banners';
 import { strings } from '@/i18n';
 import { fetchGroups, joinGroup, joinGroupByCode, type Group } from '@/lib/community';
 import { formatAgo } from '@/lib/format';
@@ -51,6 +53,8 @@ export default function Community() {
           {strings.community}
         </Txt>
         <LiveDot />
+        <View style={{ flex: 1 }} />
+        <IconButton icon={Search} label={strings.searchPeople} onPress={() => router.push('/search')} />
       </View>
       <View style={styles.pad}>
         <Segmented<Tab>
@@ -270,8 +274,8 @@ function GroupRow({
   const ago = group.lastMessageAt ? formatAgo(group.lastMessageAt) : '';
   return (
     <PressableScale scaleTo={0.98} onPress={onPress} style={[styles.groupRow, !first && styles.divider]}>
-      <View style={styles.groupAvatar}>
-        <Txt size={16} weight="bold" color={colors.accentInk}>
+      <View style={[styles.groupAvatar, { backgroundColor: bannerColors(group.banner)[0] }]}>
+        <Txt size={16} weight="bold" color="#FFFFFF">
           {group.name[0]?.toUpperCase()}
         </Txt>
       </View>

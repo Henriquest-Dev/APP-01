@@ -48,6 +48,7 @@ export function PostCard({
 }: Props) {
   const [menu, setMenu] = useState(false);
   const aspect = post.width && post.height ? Math.max(0.6, Math.min(1.9, post.width / post.height)) : 1;
+  const openAuthor = () => router.push({ pathname: '/user/[id]', params: { id: post.userId } });
   const open = () => !detail && router.push({ pathname: '/post/[id]', params: { id: post.id } });
 
   // A post counts as viewed once it has stayed on screen for a moment.
@@ -83,19 +84,19 @@ export function PostCard({
       ) : null}
 
       <View style={styles.head}>
-        <View style={styles.avatar}>
+        <PressableScale scaleTo={0.92} onPress={openAuthor} style={styles.avatar}>
           <Txt size={13} weight="bold">
             {post.username[0]?.toUpperCase() ?? '?'}
           </Txt>
-        </View>
-        <View style={{ flex: 1 }}>
+        </PressableScale>
+        <PressableScale scaleTo={0.98} onPress={openAuthor} style={{ flex: 1 }}>
           <Txt size={14} weight="semibold" numberOfLines={1}>
             @{post.username}
           </Txt>
           <Txt size={12} color={colors.textFaint}>
             {formatAgo(post.createdAt) || strings.justNow}
           </Txt>
-        </View>
+        </PressableScale>
         <PressableScale hitSlop={10} onPress={() => setMenu(true)} scaleTo={0.85} style={styles.more}>
           <MoreHorizontal size={20} color={colors.textMuted} />
         </PressableScale>

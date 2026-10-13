@@ -18,7 +18,7 @@ type Kind = 'liked' | 'reposted' | 'saved';
  * Posts feed with likes, reposts and bookmarks, kept live: new posts, likes,
  * reposts and comment counts update in about a second.
  */
-export function usePosts(userId: string | undefined, enabled = true) {
+export function usePosts(userId: string | undefined, enabled = true, authorId?: string) {
   const [posts, setPosts] = useState<Post[] | null>(null);
   const [flags, setFlags] = useState<Record<Kind, Set<string>>>({
     liked: new Set(),
@@ -38,7 +38,7 @@ export function usePosts(userId: string | undefined, enabled = true) {
   }, []);
 
   const load = useCallback(async () => {
-    const rows = await fetchPosts();
+    const rows = await fetchPosts({ userId: authorId });
     setPosts(rows);
     if (userId)
       setFlags(
@@ -47,13 +47,13 @@ export function usePosts(userId: string | undefined, enabled = true) {
           rows.map((p) => p.id),
         ),
       );
-  }, [userId]);
+  }, [userId, authorId]);
 
   useEffect(() => {
     if (!enabled) return;
     let alive = true;
     let timer: ReturnType<typeof setTimeout> | undefined;
-    fetchPosts().then(async (rows) => {
+    fetchPosts({ userId: authorId }).then(async (rows) => {
       if (!alive) return;
       setPosts(rows);
       if (userId) {
@@ -69,7 +69,7 @@ export function usePosts(userId: string | undefined, enabled = true) {
       .channel(`posts-${Math.random().toString(36).slice(2)}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' }, async (p) => {
         const post = await fetchPost((p.new as { id: string }).id);
-        if (alive && post)
+        if (alive && post && (!authorId || post.userId === authorId))
           setPosts((prev) => (prev?.some((x) => x.id === post.id) ? prev : [post, ...(prev ?? [])]));
       })
       .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'posts' }, (p) => {
@@ -98,7 +98,7 @@ export function usePosts(userId: string | undefined, enabled = true) {
       clearTimeout(timer);
       supabase.removeChannel(channel);
     };
-  }, [userId, enabled, refreshOne, load]);
+  }, [userId, enabled, authorId, refreshOne, load]);
 
   /** Flips one of my flags on a post with an instant update; rolls back if the server refuses. */
   const toggleFlag = async (kind: Kind, post: Post) => {

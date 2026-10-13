@@ -15,7 +15,6 @@ import Animated, { FadeInDown, useAnimatedStyle, withTiming } from 'react-native
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CoinAvatar } from '@/components/coin-avatar';
-import { Disclaimer } from '@/components/disclaimer';
 import { Glass } from '@/components/glass';
 import { IconButton } from '@/components/icon-button';
 import { PressableScale } from '@/components/pressable-scale';
@@ -239,7 +238,6 @@ export default function NewCall() {
           </Txt>
         </View>
 
-        <Disclaimer />
       </Screen>
     </KeyboardAvoidingView>
   );

@@ -30,6 +30,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ActionSheet } from '@/components/action-sheet';
 import { Background } from '@/components/background';
 import { FeedCallCard } from '@/components/feed-call-card';
+import { GroupBanner } from '@/components/group-banner';
 import { IconButton } from '@/components/icon-button';
 import { LiveDot } from '@/components/live-dot';
 import { PressableScale } from '@/components/pressable-scale';
@@ -164,6 +165,17 @@ export default function GroupChat() {
             <LiveDot />
           )}
         </View>
+
+        {group ? (
+          <View style={styles.bannerWrap}>
+            <GroupBanner banner={group.banner} name={group.name} style={styles.banner} />
+            {group.description ? (
+              <Txt size={13} color="#FFFFFF" numberOfLines={2} style={styles.bannerText}>
+                {group.description}
+              </Txt>
+            ) : null}
+          </View>
+        ) : null}
 
         {member && !group?.isPublic && group ? (
           <Pressable onPress={share} style={styles.codeBanner}>
@@ -384,6 +396,14 @@ function Bubble({
 }
 
 const styles = StyleSheet.create({
+  bannerWrap: {
+    marginHorizontal: space.lg,
+    marginBottom: space.sm,
+    borderRadius: radius.lg,
+    overflow: 'hidden',
+  },
+  banner: { height: 64 },
+  bannerText: { position: 'absolute', left: space.md, right: 90, bottom: 10 },
   root: { flex: 1, backgroundColor: colors.bg },
   header: {
     flexDirection: 'row',

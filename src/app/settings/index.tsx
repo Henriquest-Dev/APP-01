@@ -8,6 +8,8 @@ import {
   ChevronLeft,
   FileText,
   Globe,
+  Hash,
+  PenLine,
   Info,
   KeyRound,
   LogIn,
@@ -17,7 +19,7 @@ import {
   Trash2,
   Vibrate,
 } from 'lucide-react-native';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, Switch, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
@@ -29,6 +31,7 @@ import { Screen } from '@/components/screen';
 import { SettingsRow } from '@/components/settings-row';
 import { Txt } from '@/components/text';
 import { LANGUAGES, strings } from '@/i18n';
+import { fetchCard, updateBio, updateHandle } from '@/lib/social';
 import { haptic, hapticsEnabled, setHapticsEnabled } from '@/lib/haptics';
 import { useBlocks } from '@/state/blocks';
 import { useLanguage } from '@/state/language';
@@ -36,7 +39,7 @@ import { usePro } from '@/state/pro';
 import { useSession } from '@/state/session';
 import { colors, motion, radius, space } from '@/theme';
 
-type Dialog = 'name' | 'password' | 'delete' | 'signOut' | null;
+type Dialog = 'name' | 'password' | 'delete' | 'signOut' | null | 'handle' | 'bio';
 
 export default function Settings() {
   const { language } = useLanguage();
@@ -44,6 +47,17 @@ export default function Settings() {
   const { user, guest, signOut, updateName, changePassword, deleteAccount } = useSession();
   const { blocked } = useBlocks();
   const [dialog, setDialog] = useState<Dialog>(null);
+  const [mine, setMine] = useState<{ handle: string; bio: string } | null>(null);
+  const userId = user?.id;
+
+  useEffect(() => {
+    if (!userId) return;
+    let alive = true;
+    fetchCard(userId).then((c) => alive && c && setMine({ handle: c.handle, bio: c.bio }));
+    return () => {
+      alive = false;
+    };
+  }, [userId]);
   const [haptics, setHaptics] = useState(hapticsEnabled());
 
   const languageName = LANGUAGES.find((l) => l.code === language)?.name ?? '';
@@ -89,6 +103,18 @@ export default function Settings() {
               label={strings.username}
               value={user.name}
               onPress={() => setDialog('name')}
+            />
+            <SettingsRow
+              icon={Hash}
+              label={strings.handleLabel}
+              value={mine ? `@${mine.handle}` : undefined}
+              onPress={() => setDialog('handle')}
+            />
+            <SettingsRow
+              icon={PenLine}
+              label={strings.bioLabel}
+              value={mine?.bio || undefined}
+              onPress={() => setDialog('bio')}
             />
             <SettingsRow
               icon={KeyRound}
@@ -184,7 +210,7 @@ export default function Settings() {
       <View style={styles.brand}>
         <AnimatedLogo size={40} />
         <Txt size={12} color={colors.textFaint}>
-          Callout · {strings.disclaimer}
+          Callout
         </Txt>
       </View>
 
@@ -197,6 +223,40 @@ export default function Settings() {
         onConfirm={async (v) =>
           v.trim().length < 1 ? strings.nameRequired : (await updateName(v)) ? null : strings.callFailed
         }
+        onClose={() => setDialog(null)}
+      />
+      <PromptModal
+        visible={dialog === 'handle'}
+        title={strings.handleLabel}
+        message={strings.handleHint}
+        input={{ initial: mine?.handle, placeholder: 'callout_fan', maxLength: 21 }}
+        confirmLabel={strings.save}
+        cancelLabel={strings.cancel}
+        onConfirm={async (v) => {
+          const r = await updateHandle(v);
+          if (r === 'ok') {
+            setMine((m) => ({ bio: m?.bio ?? '', handle: v.trim().replace(/^@/, '').toLowerCase() }));
+            return null;
+          }
+          return r === 'taken'
+            ? strings.handleTaken
+            : r === 'invalid'
+              ? strings.handleInvalid
+              : strings.callFailed;
+        }}
+        onClose={() => setDialog(null)}
+      />
+      <PromptModal
+        visible={dialog === 'bio'}
+        title={strings.bioLabel}
+        input={{ initial: mine?.bio, placeholder: strings.bioPlaceholder, maxLength: 160 }}
+        confirmLabel={strings.save}
+        cancelLabel={strings.cancel}
+        onConfirm={async (v) => {
+          if (!(await updateBio(v))) return strings.callFailed;
+          setMine((m) => ({ handle: m?.handle ?? '', bio: v.trim() }));
+          return null;
+        }}
         onClose={() => setDialog(null)}
       />
       <PromptModal

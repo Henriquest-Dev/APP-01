@@ -57,14 +57,19 @@ export function FeedCallCard({ call, livePrice, fresh, compact, isMine }: Props)
       <Animated.View
         style={[styles.card, isMine && styles.mine, glowStyle, compact && { padding: space.md }]}>
         <View style={styles.head}>
-          <View style={styles.user}>
-            <Txt size={12} weight="bold">
-              {call.username[0]?.toUpperCase() ?? '?'}
+          <PressableScale
+            scaleTo={0.96}
+            onPress={() => router.push({ pathname: '/user/[id]', params: { id: call.userId } })}
+            style={styles.author}>
+            <View style={styles.user}>
+              <Txt size={12} weight="bold">
+                {call.username[0]?.toUpperCase() ?? '?'}
+              </Txt>
+            </View>
+            <Txt size={13} weight="semibold" numberOfLines={1} style={{ flexShrink: 1 }}>
+              @{call.username}
             </Txt>
-          </View>
-          <Txt size={13} weight="semibold" numberOfLines={1} style={{ flexShrink: 1 }}>
-            @{call.username}
-          </Txt>
+          </PressableScale>
           <Txt size={12} color={colors.textFaint}>
             · {ago || strings.justNow}
           </Txt>
@@ -132,6 +137,7 @@ export function FeedCallCard({ call, livePrice, fresh, compact, isMine }: Props)
 }
 
 const styles = StyleSheet.create({
+  author: { flexDirection: 'row', alignItems: 'center', gap: 8, flexShrink: 1 },
   card: {
     padding: space.lg,
     gap: space.md,
