@@ -171,7 +171,9 @@ drop trigger if exists likes_prepare on public.post_likes;
 create trigger likes_prepare before insert on public.post_likes
   for each row execute function public.prepare_like();
 
-create or replace view public.post_feed
+-- Dropped first so this file can be re-run after the others (dependent views are recreated below).
+drop view if exists public.post_feed cascade;
+create view public.post_feed
 with (security_invoker = on) as
 select
   p.id, p.user_id, pr.username, p.body, p.media_type, p.media_path, p.media_width, p.media_height,

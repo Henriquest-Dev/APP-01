@@ -110,7 +110,9 @@ revoke all on function public.record_post_view(uuid) from public, anon;
 grant execute on function public.record_post_view(uuid) to authenticated;
 
 -- Feed views: new columns are appended so existing columns keep their order.
-create or replace view public.post_feed
+-- Dropped first so this file can be re-run after the others (dependent views are recreated below).
+drop view if exists public.post_feed cascade;
+create view public.post_feed
 with (security_invoker = on) as
 select
   p.id, p.user_id, pr.username, p.body, p.media_type, p.media_path, p.media_width, p.media_height,
