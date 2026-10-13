@@ -40,3 +40,12 @@ export function formatTimeLeft(until: number, now = Date.now()): string {
   if (minutes >= 60) return `${Math.floor(minutes / 60)}h`;
   return `${Math.max(1, minutes)}m`;
 }
+
+/** Compact age: "5m", "2h", "3d"; under a minute returns "" (caller shows "now"). */
+export function formatAgo(at: number, now = Date.now()): string {
+  const minutes = Math.floor(Math.max(0, now - at) / 60000);
+  if (minutes < 1) return '';
+  if (minutes < 60) return `${minutes}m`;
+  if (minutes < 60 * 24) return `${Math.floor(minutes / 60)}h`;
+  return `${Math.floor(minutes / (60 * 24))}d`;
+}

@@ -29,10 +29,11 @@ type Row = {
   expires_at: string;
   status: CallStatus;
   exit_price: number | null;
+  note: string | null;
 };
 
 const COLUMNS =
-  'id, coin_id, symbol, name, image, direction, entry_price, target_price, timeframe, created_at, expires_at, status, exit_price';
+  'id, coin_id, symbol, name, image, direction, entry_price, target_price, timeframe, created_at, expires_at, status, exit_price, note';
 
 export function toCall(r: Row): Call {
   return {
@@ -49,6 +50,7 @@ export function toCall(r: Row): Call {
     expiresAt: Date.parse(r.expires_at),
     status: r.status,
     exitPrice: r.exit_price == null ? undefined : Number(r.exit_price),
+    note: r.note ?? undefined,
   };
 }
 
@@ -136,6 +138,7 @@ export function CallsProvider({ children }: { children: ReactNode }) {
         entry_price: call.entryPrice,
         target_price: call.targetPrice ?? null,
         timeframe: call.timeframe,
+        note: call.note?.trim() || null,
       })
       .select(COLUMNS)
       .single();

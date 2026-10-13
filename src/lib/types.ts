@@ -31,6 +31,7 @@ export type Call = {
   expiresAt: number;
   status: CallStatus;
   exitPrice?: number;
+  note?: string;
 };
 
 export type CallStatus = 'open' | 'hit' | 'miss' | 'void';

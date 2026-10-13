@@ -34,6 +34,9 @@ import { fetchChart, fetchCoin, type ChartRange } from '@/lib/api';
 import { formatCompact, formatPrice } from '@/lib/format';
 import { isStablecoin, momentumScore } from '@/lib/momentum';
 import type { Coin } from '@/lib/types';
+import { FeedCallCard } from '@/components/feed-call-card';
+import { LiveDot } from '@/components/live-dot';
+import { useCallFeed } from '@/hooks/use-call-feed';
 import { useConsensus } from '@/hooks/use-consensus';
 import { useCoin } from '@/state/market';
 import { colors, motion, radius, space } from '@/theme';
@@ -43,6 +46,7 @@ export default function CoinScreen() {
   const insets = useSafeAreaInsets();
   const cached = useCoin(id);
   const consensus = useConsensus(id);
+  const { calls: coinCalls, freshIds } = useCallFeed({ coinId: id, limit: 6 });
   const [fetched, setFetched] = useState<Coin>();
   const coin = cached ?? fetched;
 
@@ -184,6 +188,20 @@ export default function CoinScreen() {
         </Animated.View>
       )}
 
+      {coinCalls && coinCalls.length > 0 ? (
+        <Animated.View entering={FadeInDown.delay(200).duration(motion.base)} style={styles.callsBlock}>
+          <View style={styles.cardHead}>
+            <Txt size={16} weight="semibold">
+              {strings.communityCalls}
+            </Txt>
+            <LiveDot />
+          </View>
+          {coinCalls.map((c) => (
+            <FeedCallCard key={c.id} call={c} livePrice={coin.price} fresh={freshIds.has(c.id)} compact />
+          ))}
+        </Animated.View>
+      ) : null}
+
       <Animated.View entering={FadeInDown.delay(220).duration(motion.base)}>
         <Glass style={[styles.card, { gap: space.lg }]}>
           <Txt size={16} weight="semibold">
@@ -282,6 +300,7 @@ const styles = StyleSheet.create({
   pad: { paddingHorizontal: space.lg, gap: 4, marginTop: space.md },
   chart: { height: 210, marginVertical: space.lg, justifyContent: 'center' },
   card: { marginHorizontal: space.lg, marginTop: space.lg, padding: space.lg, gap: space.md },
+  callsBlock: { marginHorizontal: space.lg, marginTop: space.lg, gap: space.md },
   cardHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   stat: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   rangeTrack: { height: 4, borderRadius: 2, backgroundColor: colors.surfaceRaised },

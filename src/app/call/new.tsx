@@ -45,6 +45,7 @@ export default function NewCall() {
   const [direction, setDirection] = useState<Direction>(params.direction ?? 'up');
   const [target, setTarget] = useState('');
   const [timeframe, setTimeframe] = useState<Timeframe>('7d');
+  const [note, setNote] = useState('');
 
   const coin = coins.find((c) => c.id === coinId);
   const targetValue = Number(target.replace(',', '.'));
@@ -77,6 +78,7 @@ export default function NewCall() {
       entryPrice: coin.price,
       targetPrice: hasTarget ? targetValue : undefined,
       timeframe,
+      note,
     });
     setBusy(false);
     if (result) {
@@ -220,6 +222,23 @@ export default function NewCall() {
           />
         </View>
 
+        <Label text={strings.thesis} />
+        <View style={styles.noteWrap}>
+          <TextInput
+            value={note}
+            onChangeText={setNote}
+            placeholder={strings.thesisPlaceholder}
+            placeholderTextColor={colors.textFaint}
+            selectionColor={colors.accent}
+            multiline
+            maxLength={280}
+            style={styles.noteInput}
+          />
+          <Txt size={11} color={colors.textFaint} style={{ alignSelf: 'flex-end' }}>
+            {note.length}/280
+          </Txt>
+        </View>
+
         <Disclaimer />
       </Screen>
     </KeyboardAvoidingView>
@@ -341,6 +360,21 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   input: { flex: 1, color: colors.text, fontFamily: fonts.semibold, fontSize: 22 },
+  noteWrap: {
+    marginHorizontal: space.lg,
+    padding: space.md,
+    borderRadius: radius.md,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  noteInput: {
+    minHeight: 70,
+    color: colors.text,
+    fontFamily: fonts.regular,
+    fontSize: 15,
+    textAlignVertical: 'top',
+  },
   footer: {
     position: 'absolute',
     left: 0,

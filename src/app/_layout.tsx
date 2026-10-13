@@ -84,6 +84,11 @@ function RootStack() {
       <Stack.Protected guard={signedIn}>
         <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
         <Stack.Screen name="coin/[id]" />
+        <Stack.Screen name="group/[id]" />
+        <Stack.Screen
+          name="group/new"
+          options={{ presentation: 'modal', animation: 'slide_from_bottom', gestureDirection: 'vertical' }}
+        />
         <Stack.Screen
           name="call/new"
           options={{ presentation: 'modal', animation: 'slide_from_bottom', gestureDirection: 'vertical' }}

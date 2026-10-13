@@ -1,7 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import type { BottomTabBarProps } from 'expo-router/tabs';
-import { ChartCandlestick, House, Plus, Trophy, UserRound, type LucideIcon } from 'lucide-react-native';
+import { House, MessagesSquare, Plus, Trophy, UserRound, type LucideIcon } from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { useAnimatedStyle, withSpring } from 'react-native-reanimated';
@@ -11,7 +11,7 @@ import { colors, motion, radius, space } from '@/theme';
 
 const ICONS: Record<string, LucideIcon> = {
   index: House,
-  markets: ChartCandlestick,
+  community: MessagesSquare,
   ranking: Trophy,
   profile: UserRound,
 };
@@ -28,9 +28,11 @@ export function TabBar({ state, navigation, descriptors, insets }: BottomTabBarP
     transform: [{ translateX: activeX === undefined ? 0 : withSpring(activeX, motion.spring) }],
   }));
 
+  // Markets stays reachable (search) but isn't a tab button.
   const tabs = state.routes.map((route, index) => {
+    if (!ICONS[route.name]) return null;
     const focused = state.index === index;
-    const Icon = ICONS[route.name] ?? House;
+    const Icon = ICONS[route.name];
     const label = descriptors[route.key].options.title ?? route.name;
     return (
       <Pressable
@@ -69,14 +71,15 @@ export function TabBar({ state, navigation, descriptors, insets }: BottomTabBarP
     </Pressable>
   );
 
-  const half = Math.ceil(tabs.length / 2);
+  const visible = tabs.filter(Boolean);
+  const half = Math.ceil(visible.length / 2);
   return (
     <View pointerEvents="box-none" style={[styles.wrap, { bottom: Math.max(insets.bottom, space.md) }]}>
       <View style={styles.bar}>
         <Animated.View style={[styles.highlight, highlight]} />
-        {tabs.slice(0, half)}
+        {visible.slice(0, half)}
         {center}
-        {tabs.slice(half)}
+        {visible.slice(half)}
       </View>
     </View>
   );
