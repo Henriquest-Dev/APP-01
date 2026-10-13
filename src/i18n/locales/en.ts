@@ -195,6 +195,12 @@ export const en = {
   termsOfService: 'Terms of Service',
   privacyPolicy: 'Privacy Policy',
   riskNotice: 'Risk notice',
+  repostedBy: '{name} reposted',
+  savedPosts: 'Saved posts',
+  noSaved: 'Nothing saved yet. Tap the bookmark on a post to keep it here.',
+  addedToSaved: 'Saved',
+  removedFromSaved: 'Removed from saved',
+  sharePostMessage: '@{name} on Callout: {text}\n{link}',
 };
 
 export type Strings = typeof en;

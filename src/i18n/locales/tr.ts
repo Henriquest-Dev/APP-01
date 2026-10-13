@@ -197,4 +197,10 @@ export const tr: Strings = {
   termsOfService: 'Hizmet Şartları',
   privacyPolicy: 'Gizlilik Politikası',
   riskNotice: 'Risk uyarısı',
+  repostedBy: '{name} yeniden paylaştı',
+  savedPosts: 'Kaydedilen gönderiler',
+  noSaved: 'Henüz bir şey kaydetmedin. Bir gönderinin yer imine dokunarak buraya kaydet.',
+  addedToSaved: 'Kaydedildi',
+  removedFromSaved: 'Kaydedilenlerden çıkarıldı',
+  sharePostMessage: 'Callout’ta @{name}: {text}\n{link}',
 };

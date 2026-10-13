@@ -1,21 +1,15 @@
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { Ban, Flag, Heart, MessageCircle, MoreHorizontal, Trash2 } from 'lucide-react-native';
-import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSequence,
-  withSpring,
-} from 'react-native-reanimated';
+import { Ban, Flag, MoreHorizontal, Repeat2, Trash2 } from 'lucide-react-native';
+import { useEffect, useState } from 'react';
+import { Share, StyleSheet, View } from 'react-native';
 
 import { strings } from '@/i18n';
 import { formatAgo } from '@/lib/format';
-import { haptic } from '@/lib/haptics';
-import type { Post } from '@/lib/posts';
+import { recordView, type Post } from '@/lib/posts';
 import { colors, radius, space } from '@/theme';
 import { ActionSheet, type SheetAction } from './action-sheet';
+import { PostActions } from './post-actions';
 import { PostVideo } from './post-video';
 import { PressableScale } from './pressable-scale';
 import { Txt } from './text';
@@ -23,27 +17,52 @@ import { Txt } from './text';
 type Props = {
   post: Post;
   liked: boolean;
+  reposted: boolean;
+  saved: boolean;
   isMine: boolean;
   onLike: () => void;
+  onRepost: () => void;
+  onSave: () => void;
   onReport: () => void;
   onBlock: () => void;
   onDelete: () => void;
-  /** Detail screen shows the full text and no comment shortcut. */
+  /** Detail screen shows the full text, and the comment button just focuses the composer. */
   detail?: boolean;
+  onComment?: () => void;
 };
 
-export function PostCard({ post, liked, isMine, onLike, onReport, onBlock, onDelete, detail }: Props) {
+export function PostCard({
+  post,
+  liked,
+  reposted,
+  saved,
+  isMine,
+  onLike,
+  onRepost,
+  onSave,
+  onReport,
+  onBlock,
+  onDelete,
+  detail,
+  onComment,
+}: Props) {
   const [menu, setMenu] = useState(false);
-  const heart = useSharedValue(1);
-  const heartStyle = useAnimatedStyle(() => ({ transform: [{ scale: heart.value }] }));
   const aspect = post.width && post.height ? Math.max(0.6, Math.min(1.9, post.width / post.height)) : 1;
   const open = () => !detail && router.push({ pathname: '/post/[id]', params: { id: post.id } });
 
-  const like = () => {
-    heart.set(withSequence(withSpring(1.35, { damping: 6 }), withSpring(1, { damping: 10 })));
-    haptic.tap();
-    onLike();
-  };
+  // A post counts as viewed once it has stayed on screen for a moment.
+  useEffect(() => {
+    const t = setTimeout(() => recordView(post.id).catch(() => {}), 1200);
+    return () => clearTimeout(t);
+  }, [post.id]);
+
+  const share = () =>
+    Share.share({
+      message: strings.sharePostMessage
+        .replace('{name}', post.username)
+        .replace('{text}', post.body.slice(0, 140) || (post.mediaType === 'video' ? '🎬' : '🖼️'))
+        .replace('{link}', `callout://post/${post.id}`),
+    }).catch(() => {});
 
   const actions: SheetAction[] = isMine
     ? [{ label: strings.deletePost, icon: Trash2, onPress: onDelete, destructive: true }]
@@ -54,6 +73,15 @@ export function PostCard({ post, liked, isMine, onLike, onReport, onBlock, onDel
 
   return (
     <View style={styles.card}>
+      {post.repostedBy ? (
+        <View style={styles.repostBanner}>
+          <Repeat2 size={14} color={colors.textMuted} strokeWidth={2.2} />
+          <Txt size={12} weight="semibold" color={colors.textMuted}>
+            {strings.repostedBy.replace('{name}', post.repostedBy.username)}
+          </Txt>
+        </View>
+      ) : null}
+
       <View style={styles.head}>
         <View style={styles.avatar}>
           <Txt size={13} weight="bold">
@@ -82,47 +110,35 @@ export function PostCard({ post, liked, isMine, onLike, onReport, onBlock, onDel
       ) : null}
 
       {post.mediaUrl && post.mediaType === 'image' ? (
-        <PressableScale scaleTo={0.99} onPress={open}>
+        <PressableScale scaleTo={0.99} onPress={open} style={styles.media}>
           <Image
             source={{ uri: post.mediaUrl }}
-            style={[styles.media, { aspectRatio: aspect }]}
+            style={{ width: '100%', aspectRatio: aspect }}
             contentFit="cover"
             transition={250}
           />
         </PressableScale>
       ) : null}
       {post.mediaUrl && post.mediaType === 'video' ? (
-        <View style={styles.mediaWrap}>
+        <View style={styles.media}>
           <PostVideo uri={post.mediaUrl} aspect={aspect} />
         </View>
       ) : null}
 
-      <View style={styles.actions}>
-        <PressableScale
-          onPress={like}
-          scaleTo={0.9}
-          style={styles.action}
-          accessibilityRole="button"
-          accessibilityLabel="Like">
-          <Animated.View style={heartStyle}>
-            <Heart
-              size={20}
-              color={liked ? colors.down : colors.textMuted}
-              fill={liked ? colors.down : 'transparent'}
-              strokeWidth={2}
-            />
-          </Animated.View>
-          <Txt size={13} color={liked ? colors.down : colors.textMuted} numeric>
-            {post.likeCount}
-          </Txt>
-        </PressableScale>
-        <PressableScale onPress={open} scaleTo={0.9} style={styles.action} accessibilityRole="button">
-          <MessageCircle size={20} color={colors.textMuted} strokeWidth={2} />
-          <Txt size={13} color={colors.textMuted} numeric>
-            {post.commentCount}
-          </Txt>
-        </PressableScale>
-      </View>
+      <PostActions
+        comments={post.commentCount}
+        reposts={post.repostCount}
+        likes={post.likeCount}
+        views={post.viewCount}
+        liked={liked}
+        reposted={reposted}
+        saved={saved}
+        onComment={onComment ?? open}
+        onRepost={onRepost}
+        onLike={onLike}
+        onSave={onSave}
+        onShare={share}
+      />
 
       <ActionSheet visible={menu} actions={actions} onClose={() => setMenu(false)} />
     </View>
@@ -136,6 +152,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     overflow: 'hidden',
+  },
+  repostBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: space.lg,
+    paddingTop: space.md,
   },
   head: {
     flexDirection: 'row',
@@ -154,8 +177,11 @@ const styles = StyleSheet.create({
   },
   more: { width: 32, height: 32, alignItems: 'center', justifyContent: 'center' },
   body: { paddingHorizontal: space.lg, paddingBottom: space.md, lineHeight: 21 },
-  media: { width: '100%', backgroundColor: colors.surfaceRaised },
-  mediaWrap: { width: '100%' },
-  actions: { flexDirection: 'row', gap: space.xl, paddingHorizontal: space.lg, paddingVertical: space.md },
-  action: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  // Rounded media inset from the card edges, like X.
+  media: {
+    marginHorizontal: space.lg,
+    borderRadius: 16,
+    overflow: 'hidden',
+    backgroundColor: colors.surfaceRaised,
+  },
 });

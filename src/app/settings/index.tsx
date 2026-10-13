@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import {
   AtSign,
   Ban,
+  Bookmark,
   ChevronLeft,
   FileText,
   Globe,
@@ -134,6 +135,11 @@ export default function Settings() {
         <Section title={strings.privacySafety}>
           <SettingsRow
             first
+            icon={Bookmark}
+            label={strings.savedPosts}
+            onPress={() => router.push('/saved')}
+          />
+          <SettingsRow
             icon={Ban}
             label={strings.blockedUsers}
             value={blocked.length ? String(blocked.length) : undefined}

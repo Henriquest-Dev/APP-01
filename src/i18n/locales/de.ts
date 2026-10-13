@@ -198,4 +198,10 @@ export const de: Strings = {
   termsOfService: 'Nutzungsbedingungen',
   privacyPolicy: 'Datenschutzerklärung',
   riskNotice: 'Risikohinweis',
+  repostedBy: '{name} hat repostet',
+  savedPosts: 'Gespeicherte Posts',
+  noSaved: 'Noch nichts gespeichert. Tippe bei einem Post auf das Lesezeichen, um ihn hier zu speichern.',
+  addedToSaved: 'Gespeichert',
+  removedFromSaved: 'Aus Gespeichert entfernt',
+  sharePostMessage: '@{name} auf Callout: {text}\n{link}',
 };

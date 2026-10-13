@@ -34,7 +34,7 @@ export function PostVideo({ uri, aspect }: { uri: string; aspect: number }) {
           player.muted = !muted;
           setMuted(!muted);
         }}>
-        {muted ? <VolumeX size={16} color="#FFFFFF" /> : <Volume2 size={16} color="#FFFFFF" />}
+        {muted ? <VolumeX size={19} color="#FFFFFF" /> : <Volume2 size={19} color="#FFFFFF" />}
       </Pressable>
     </View>
   );
@@ -55,12 +55,14 @@ const styles = StyleSheet.create({
   },
   sound: {
     position: 'absolute',
-    right: 10,
-    bottom: 10,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    right: 12,
+    bottom: 12,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.18)',
     alignItems: 'center',
     justifyContent: 'center',
   },

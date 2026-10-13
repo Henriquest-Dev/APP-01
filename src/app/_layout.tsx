@@ -89,6 +89,7 @@ function RootStack() {
         <Stack.Screen name="coin/[id]" />
         <Stack.Screen name="group/[id]" />
         <Stack.Screen name="post/[id]" />
+        <Stack.Screen name="saved" />
         <Stack.Screen
           name="post/new"
           options={{ presentation: 'modal', animation: 'slide_from_bottom', gestureDirection: 'vertical' }}

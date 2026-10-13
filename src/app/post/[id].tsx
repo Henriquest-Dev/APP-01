@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ban, ChevronLeft, Flag, SendHorizontal, Trash2 } from 'lucide-react-native';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -29,9 +29,11 @@ import {
   deleteComment,
   deletePost,
   fetchComments,
-  fetchMyLikes,
+  fetchMyFlags,
   fetchPost,
+  setBookmark,
   setLike,
+  setRepost,
   type Comment,
   type Post,
 } from '@/lib/posts';
@@ -48,6 +50,9 @@ export default function PostDetail() {
   const { isBlocked, block } = useBlocks();
   const [post, setPost] = useState<Post | null | undefined>(undefined);
   const [liked, setLiked] = useState(false);
+  const [reposted, setReposted] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const inputRef = useRef<TextInput>(null);
   const [comments, setComments] = useState<Comment[] | null>(null);
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
@@ -58,7 +63,13 @@ export default function PostDetail() {
     let alive = true;
     fetchPost(id).then((p) => alive && setPost(p));
     fetchComments(id).then((c) => alive && setComments(c));
-    if (user) fetchMyLikes(user.id, [id]).then((s) => alive && setLiked(s.has(id)));
+    if (user)
+      fetchMyFlags(user.id, [id]).then((f) => {
+        if (!alive) return;
+        setLiked(f.liked.has(id));
+        setReposted(f.reposted.has(id));
+        setSaved(f.saved.has(id));
+      });
 
     const channel = supabase
       .channel(`post-${id}`)
@@ -94,6 +105,13 @@ export default function PostDetail() {
           fetchPost(id).then((p) => alive && p && setPost(p));
         },
       )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'post_reposts', filter: `post_id=eq.${id}` },
+        () => {
+          fetchPost(id).then((p) => alive && p && setPost(p));
+        },
+      )
       .subscribe();
 
     return () => {
@@ -122,15 +140,25 @@ export default function PostDetail() {
     }
   };
 
-  const toggleLike = async () => {
+  /** Instant flip of one of my flags (like, repost, save) with rollback if the server refuses. */
+  const flip = async (kind: 'like' | 'repost' | 'save') => {
     if (!user || !post) return say(strings.accountNeeded);
-    const was = liked;
-    setLiked(!was);
-    setPost({ ...post, likeCount: post.likeCount + (was ? -1 : 1) });
+    const [was, setWas, run] =
+      kind === 'like'
+        ? ([liked, setLiked, setLike] as const)
+        : kind === 'repost'
+          ? ([reposted, setReposted, setRepost] as const)
+          : ([saved, setSaved, setBookmark] as const);
+    const delta = was ? -1 : 1;
+    setWas(!was);
+    if (kind === 'like') setPost({ ...post, likeCount: post.likeCount + delta });
+    if (kind === 'repost') setPost({ ...post, repostCount: post.repostCount + delta });
     try {
-      await setLike(post.id, !was, user.id);
+      await run(post.id, !was, user.id);
+      if (kind === 'save') say(was ? strings.removedFromSaved : strings.addedToSaved);
     } catch {
-      setLiked(was);
+      setWas(was);
+      fetchPost(id).then((p) => p && setPost(p));
     }
   };
 
@@ -198,9 +226,14 @@ export default function PostDetail() {
                 <PostCard
                   post={post}
                   liked={liked}
+                  reposted={reposted}
+                  saved={saved}
                   detail
+                  onComment={() => inputRef.current?.focus()}
                   isMine={post.userId === user?.id}
-                  onLike={toggleLike}
+                  onLike={() => flip('like')}
+                  onRepost={() => flip('repost')}
+                  onSave={() => flip('save')}
                   onReport={() =>
                     report('post', post.id)
                       .then(() => say(strings.reportThanks))
@@ -267,6 +300,7 @@ export default function PostDetail() {
         {post ? (
           <View style={[styles.composer, { paddingBottom: insets.bottom + space.sm }]}>
             <TextInput
+              ref={inputRef}
               value={text}
               onChangeText={setText}
               placeholder={strings.commentPlaceholder}

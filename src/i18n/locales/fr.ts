@@ -200,4 +200,10 @@ export const fr: Strings = {
   termsOfService: 'Conditions d’utilisation',
   privacyPolicy: 'Politique de confidentialité',
   riskNotice: 'Avertissement sur les risques',
+  repostedBy: '{name} a reposté',
+  savedPosts: 'Posts enregistrés',
+  noSaved: 'Rien d’enregistré. Touche le marque-page d’un post pour le garder ici.',
+  addedToSaved: 'Enregistré',
+  removedFromSaved: 'Retiré des enregistrés',
+  sharePostMessage: '@{name} sur Callout : {text}\n{link}',
 };

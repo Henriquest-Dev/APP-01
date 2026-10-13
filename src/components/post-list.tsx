@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { ImagePlus } from 'lucide-react-native';
+import { Bookmark, ImagePlus } from 'lucide-react-native';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown, LinearTransition } from 'react-native-reanimated';
 
@@ -11,6 +11,7 @@ import { useBlocks } from '@/state/blocks';
 import { useSession } from '@/state/session';
 import { colors, motion, radius, space } from '@/theme';
 import { Glass } from './glass';
+import { IconButton } from './icon-button';
 import { PostCard } from './post-card';
 import { PressableScale } from './pressable-scale';
 import { Txt } from './text';
@@ -19,23 +20,36 @@ import { Txt } from './text';
 export function PostList({ onNotice }: { onNotice: (text: string) => void }) {
   const { user } = useSession();
   const { isBlocked, block } = useBlocks();
-  const { posts, liked, toggleLike, remove } = usePosts(user?.id);
+  const { posts, liked, reposted, saved, toggleLike, toggleRepost, toggleSave, remove } = usePosts(user?.id);
 
-  const visible = (posts ?? []).filter((p) => !isBlocked(p.userId));
+  const visible = (posts ?? []).filter(
+    (p) => !isBlocked(p.userId) && !(p.repostedBy && isBlocked(p.repostedBy.id)),
+  );
+  const needAccount = async (ok: Promise<boolean>) => {
+    if (!(await ok)) onNotice(strings.accountNeeded);
+  };
 
   return (
     <View>
-      <PressableScale
-        accessibilityRole="button"
-        onPress={() => (user ? router.push('/post/new') : onNotice(strings.accountNeeded))}
-        style={styles.compose}>
-        <View style={styles.composeIcon}>
-          <ImagePlus size={18} color={colors.accentInk} strokeWidth={2.2} />
-        </View>
-        <Txt size={15} color={colors.textMuted}>
-          {strings.newPostPrompt}
-        </Txt>
-      </PressableScale>
+      <View style={styles.composeRow}>
+        <PressableScale
+          accessibilityRole="button"
+          onPress={() => (user ? router.push('/post/new') : onNotice(strings.accountNeeded))}
+          style={styles.compose}>
+          <View style={styles.composeIcon}>
+            <ImagePlus size={18} color={colors.accentInk} strokeWidth={2.2} />
+          </View>
+          <Txt size={15} color={colors.textMuted} numberOfLines={1} style={{ flex: 1 }}>
+            {strings.newPostPrompt}
+          </Txt>
+        </PressableScale>
+        <IconButton
+          icon={Bookmark}
+          label={strings.savedPosts}
+          onPress={() => (user ? router.push('/saved') : onNotice(strings.accountNeeded))}
+          size={52}
+        />
+      </View>
 
       {posts === null ? (
         <ActivityIndicator color={colors.accent} style={{ marginTop: space.xxl }} />
@@ -49,15 +63,26 @@ export function PostList({ onNotice }: { onNotice: (text: string) => void }) {
         <View style={styles.list}>
           {visible.map((p, i) => (
             <Animated.View
-              key={p.id}
+              key={`${p.id}-${p.repostedBy?.id ?? ''}`}
               layout={LinearTransition.duration(motion.base)}
               entering={FadeInDown.delay(Math.min(i, 6) * motion.stagger).duration(motion.base)}>
               <PostCard
                 post={p}
                 liked={liked.has(p.id)}
+                reposted={reposted.has(p.id)}
+                saved={saved.has(p.id)}
                 isMine={p.userId === user?.id}
-                onLike={async () => {
-                  if (!(await toggleLike(p))) onNotice(strings.accountNeeded);
+                onLike={() => needAccount(toggleLike(p))}
+                onRepost={() => needAccount(toggleRepost(p))}
+                onSave={async () => {
+                  const ok = await toggleSave(p);
+                  onNotice(
+                    ok
+                      ? saved.has(p.id)
+                        ? strings.removedFromSaved
+                        : strings.addedToSaved
+                      : strings.accountNeeded,
+                  );
                 }}
                 onReport={async () => {
                   try {
@@ -93,12 +118,18 @@ export function PostList({ onNotice }: { onNotice: (text: string) => void }) {
 }
 
 const styles = StyleSheet.create({
+  composeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.sm,
+    marginHorizontal: space.lg,
+    marginTop: space.lg,
+  },
   compose: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: space.md,
-    marginHorizontal: space.lg,
-    marginTop: space.lg,
     padding: space.md,
     borderRadius: radius.pill,
     backgroundColor: colors.surface,

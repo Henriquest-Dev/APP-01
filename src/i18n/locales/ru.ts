@@ -197,4 +197,10 @@ export const ru: Strings = {
   termsOfService: 'Условия использования',
   privacyPolicy: 'Политика конфиденциальности',
   riskNotice: 'Предупреждение о рисках',
+  repostedBy: '{name} сделал(а) репост',
+  savedPosts: 'Сохранённые посты',
+  noSaved: 'Пока ничего не сохранено. Нажми закладку у поста, чтобы сохранить его здесь.',
+  addedToSaved: 'Сохранено',
+  removedFromSaved: 'Удалено из сохранённого',
+  sharePostMessage: '@{name} в Callout: {text}\n{link}',
 };

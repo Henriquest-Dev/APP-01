@@ -197,4 +197,10 @@ export const es: Strings = {
   termsOfService: 'Términos de Servicio',
   privacyPolicy: 'Política de Privacidad',
   riskNotice: 'Aviso de riesgo',
+  repostedBy: '{name} republicó',
+  savedPosts: 'Posts guardados',
+  noSaved: 'Aún no has guardado nada. Toca el marcador de un post para guardarlo aquí.',
+  addedToSaved: 'Guardado',
+  removedFromSaved: 'Quitado de guardados',
+  sharePostMessage: '@{name} en Callout: {text}\n{link}',
 };

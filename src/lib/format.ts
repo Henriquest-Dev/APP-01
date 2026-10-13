@@ -1,5 +1,21 @@
+import { currentLanguage } from '@/i18n';
+
 // Crypto convention: "$82,431.00" for every locale.
 const locale = 'en-US';
+
+const LOCALES: Record<string, string> = {
+  pt: 'pt-PT',
+  en: 'en-US',
+  es: 'es-ES',
+  fr: 'fr-FR',
+  de: 'de-DE',
+  it: 'it-IT',
+  ru: 'ru-RU',
+  tr: 'tr-TR',
+  zh: 'zh-CN',
+  hi: 'hi-IN',
+};
+const currentLocale = () => LOCALES[currentLanguage()] ?? 'en-US';
 
 export function formatPrice(value: number): string {
   const digits = value >= 1000 ? 2 : value >= 1 ? 2 : value >= 0.01 ? 4 : 8;
@@ -48,4 +64,25 @@ export function formatAgo(at: number, now = Date.now()): string {
   if (minutes < 60) return `${minutes}m`;
   if (minutes < 60 * 24) return `${Math.floor(minutes / 60)}h`;
   return `${Math.floor(minutes / (60 * 24))}d`;
+}
+
+/** 868 / 1,1K / 49K / 2,3M — the same short style as X; empty for zero so the icon stands alone. */
+export function formatCount(n: number): string {
+  if (!n) return '';
+  const units: [number, string][] = [
+    [1e9, 'B'],
+    [1e6, 'M'],
+    [1e3, 'K'],
+  ];
+  for (const [size, suffix] of units) {
+    if (n >= size) {
+      const v = n / size;
+      // One decimal under 10 (1,1K), none above (49K).
+      const text = new Intl.NumberFormat(currentLocale(), { maximumFractionDigits: v < 10 ? 1 : 0 }).format(
+        Math.floor(v * 10) / 10,
+      );
+      return `${text}${suffix}`;
+    }
+  }
+  return String(n);
 }

@@ -196,4 +196,10 @@ export const it: Strings = {
   termsOfService: 'Termini di servizio',
   privacyPolicy: 'Informativa sulla privacy',
   riskNotice: 'Avviso sui rischi',
+  repostedBy: '{name} ha repostato',
+  savedPosts: 'Post salvati',
+  noSaved: 'Ancora niente salvato. Tocca il segnalibro su un post per tenerlo qui.',
+  addedToSaved: 'Salvato',
+  removedFromSaved: 'Rimosso dai salvati',
+  sharePostMessage: '@{name} su Callout: {text}\n{link}',
 };

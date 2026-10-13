@@ -196,4 +196,10 @@ export const hi: Strings = {
   termsOfService: 'सेवा की शर्तें',
   privacyPolicy: 'प्राइवेसी पॉलिसी',
   riskNotice: 'जोखिम सूचना',
+  repostedBy: '{name} ने रीपोस्ट किया',
+  savedPosts: 'सेव की गई पोस्ट',
+  noSaved: 'अभी कुछ सेव नहीं है। किसी पोस्ट के बुकमार्क पर टैप करके यहाँ सेव करें।',
+  addedToSaved: 'सेव किया गया',
+  removedFromSaved: 'सेव से हटाया गया',
+  sharePostMessage: 'Callout पर @{name}: {text}\n{link}',
 };

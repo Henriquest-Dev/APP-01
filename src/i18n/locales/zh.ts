@@ -194,4 +194,10 @@ export const zh: Strings = {
   termsOfService: '服务条款',
   privacyPolicy: '隐私政策',
   riskNotice: '风险提示',
+  repostedBy: '{name} 转发了',
+  savedPosts: '已收藏的帖子',
+  noSaved: '还没有收藏。点击帖子上的书签即可保存到这里。',
+  addedToSaved: '已收藏',
+  removedFromSaved: '已取消收藏',
+  sharePostMessage: 'Callout 上的 @{name}：{text}\n{link}',
 };
