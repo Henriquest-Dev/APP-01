@@ -1,6 +1,6 @@
 import { supabase } from './supabase';
 
-export type ReportTarget = 'post' | 'comment' | 'message' | 'user' | 'call';
+export type ReportTarget = 'post' | 'comment' | 'message' | 'user' | 'call' | 'live';
 
 export async function report(targetType: ReportTarget, targetId: string, reason?: string) {
   const { error } = await supabase

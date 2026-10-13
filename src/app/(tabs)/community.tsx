@@ -1,5 +1,5 @@
 import { router, useFocusEffect } from 'expo-router';
-import { ChevronRight, Globe, KeyRound, Lock, Plus, Search, Users } from 'lucide-react-native';
+import { ChevronRight, Globe, KeyRound, Lock, Plus, Radio, Search, Users } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, StyleSheet, TextInput, View } from 'react-native';
 import Animated, { FadeInDown, FadeInUp, FadeOut, LinearTransition } from 'react-native-reanimated';
@@ -15,6 +15,8 @@ import { Segmented } from '@/components/segmented';
 import { Txt } from '@/components/text';
 import { useCallFeed } from '@/hooks/use-call-feed';
 import { bannerColors } from '@/lib/banners';
+import { LiveCard } from '@/components/live-card';
+import { useLives } from '@/hooks/use-lives';
 import { strings } from '@/i18n';
 import { fetchGroups, joinGroup, joinGroupByCode, type Group } from '@/lib/community';
 import { formatAgo } from '@/lib/format';
@@ -23,7 +25,7 @@ import { useMarket } from '@/state/market';
 import { useSession } from '@/state/session';
 import { colors, fonts, motion, radius, space } from '@/theme';
 
-type Tab = 'feed' | 'posts' | 'groups';
+type Tab = 'feed' | 'posts' | 'lives' | 'groups';
 type Scope = 'all' | 'mine';
 
 export default function Community() {
@@ -63,11 +65,20 @@ export default function Community() {
           options={[
             { value: 'feed', label: strings.callsTab },
             { value: 'posts', label: strings.posts },
+            { value: 'lives', label: strings.livesTab },
             { value: 'groups', label: strings.groups },
           ]}
         />
       </View>
-      {tab === 'feed' ? <Feed /> : tab === 'posts' ? <PostList onNotice={showNotice} /> : <Groups />}
+      {tab === 'feed' ? (
+        <Feed />
+      ) : tab === 'posts' ? (
+        <PostList onNotice={showNotice} />
+      ) : tab === 'lives' ? (
+        <Lives />
+      ) : (
+        <Groups />
+      )}
     </Screen>
   );
 }
@@ -116,6 +127,56 @@ function Feed() {
                 fresh={freshIds.has(c.id)}
                 isMine={c.userId === user?.id}
               />
+            </Animated.View>
+          ))}
+        </View>
+      )}
+    </View>
+  );
+}
+
+function Lives() {
+  const { user } = useSession();
+  const { isBlocked } = useBlocks();
+  const lives = useLives();
+  const visible = lives?.filter((l) => !isBlocked(l.userId)) ?? null;
+  const mine = visible?.find((l) => l.userId === user?.id);
+  const [error, setError] = useState<string | null>(null);
+
+  return (
+    <View>
+      <View style={styles.actions}>
+        <PressableScale
+          accessibilityRole="button"
+          onPress={() => {
+            if (!user) return setError(strings.accountNeeded);
+            if (mine) return router.push({ pathname: '/live/[id]', params: { id: mine.id } });
+            router.push('/live/new');
+          }}
+          style={[styles.actionBtn, { backgroundColor: colors.accent }]}>
+          <Radio size={18} color={colors.accentInk} strokeWidth={2.4} />
+          <Txt size={14} weight="semibold" color={colors.accentInk}>
+            {mine ? strings.liveMine : strings.goLive}
+          </Txt>
+        </PressableScale>
+      </View>
+      {error ? (
+        <Txt size={13} color={colors.down} style={{ paddingHorizontal: space.lg, marginTop: space.sm }}>
+          {error}
+        </Txt>
+      ) : null}
+      {visible === null ? (
+        <ActivityIndicator color={colors.accent} style={{ marginTop: space.xxl }} />
+      ) : visible.length === 0 ? (
+        <Empty text={strings.noLives} />
+      ) : (
+        <View style={styles.list}>
+          {visible.map((l, i) => (
+            <Animated.View
+              key={l.id}
+              layout={LinearTransition.duration(motion.base)}
+              entering={FadeInDown.delay(Math.min(i, 8) * motion.stagger).duration(motion.base)}>
+              <LiveCard live={l} />
             </Animated.View>
           ))}
         </View>
