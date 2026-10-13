@@ -98,3 +98,7 @@ comunidade e o ranking são **dados de demonstração** (marcados "DEMO") até e
 - As calls são resolvidas automaticamente: alvo atingido → acerto imediato; no prazo sem alvo → pela
   direção do movimento.
 - `.env` tem só valores públicos (URL e publishable key). Nunca coloques aqui a secret key.
+
+## Callout Pro billing
+
+Self-hosted subscriptions on Google Play Billing + Supabase (no RevenueCat). See [`supabase/BILLING_SETUP.md`](supabase/BILLING_SETUP.md).

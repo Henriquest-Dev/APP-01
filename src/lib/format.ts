@@ -15,7 +15,7 @@ const LOCALES: Record<string, string> = {
   zh: 'zh-CN',
   hi: 'hi-IN',
 };
-const currentLocale = () => LOCALES[currentLanguage()] ?? 'en-US';
+export const currentLocale = () => LOCALES[currentLanguage()] ?? 'en-US';
 
 export function formatPrice(value: number): string {
   const digits = value >= 1000 ? 2 : value >= 1 ? 2 : value >= 0.01 ? 4 : 8;

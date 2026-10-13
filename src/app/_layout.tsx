@@ -16,6 +16,7 @@ import { BlocksProvider } from '@/state/blocks';
 import { CallsProvider } from '@/state/calls';
 import { consumeReopenSettings, LanguageProvider } from '@/state/language';
 import { MarketProvider } from '@/state/market';
+import { ProProvider } from '@/state/pro';
 import { SessionProvider, useSession } from '@/state/session';
 import { colors } from '@/theme';
 
@@ -45,8 +46,10 @@ export default function RootLayout() {
           <MarketProvider>
             <CallsProvider>
               <BlocksProvider>
+                <ProProvider>
                 {/* Re-mount the UI when the language changes so every screen re-reads its strings. */}
                 <LanguageProvider>{(language) => <RootStack key={language} />}</LanguageProvider>
+                </ProProvider>
               </BlocksProvider>
             </CallsProvider>
           </MarketProvider>
@@ -90,6 +93,7 @@ function RootStack() {
         <Stack.Screen name="group/[id]" />
         <Stack.Screen name="post/[id]" />
         <Stack.Screen name="saved" />
+        <Stack.Screen name="pro" />
         <Stack.Screen
           name="post/new"
           options={{ presentation: 'modal', animation: 'slide_from_bottom', gestureDirection: 'vertical' }}

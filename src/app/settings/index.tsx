@@ -1,6 +1,7 @@
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import {
+  Sparkles,
   AtSign,
   Ban,
   Bookmark,
@@ -31,6 +32,7 @@ import { LANGUAGES, strings } from '@/i18n';
 import { haptic, hapticsEnabled, setHapticsEnabled } from '@/lib/haptics';
 import { useBlocks } from '@/state/blocks';
 import { useLanguage } from '@/state/language';
+import { usePro } from '@/state/pro';
 import { useSession } from '@/state/session';
 import { colors, motion, radius, space } from '@/theme';
 
@@ -38,6 +40,7 @@ type Dialog = 'name' | 'password' | 'delete' | 'signOut' | null;
 
 export default function Settings() {
   const { language } = useLanguage();
+  const { pro } = usePro();
   const { user, guest, signOut, updateName, changePassword, deleteAccount } = useSession();
   const { blocked } = useBlocks();
   const [dialog, setDialog] = useState<Dialog>(null);
@@ -103,6 +106,16 @@ export default function Settings() {
         ) : (
           <SettingsRow first icon={LogIn} label={guest ? strings.signUp : strings.signIn} onPress={signOut} />
         )}
+      </Section>
+
+      <Section title="Callout Pro">
+        <SettingsRow
+          first
+          icon={Sparkles}
+          label="Callout Pro"
+          value={pro ? strings.proActive : undefined}
+          onPress={() => router.push('/pro')}
+        />
       </Section>
 
       <Section title={strings.preferences}>

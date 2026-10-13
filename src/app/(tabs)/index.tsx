@@ -21,6 +21,7 @@ import { strings } from '@/i18n';
 import { formatPrice } from '@/lib/format';
 import { isStablecoin, momentumScore } from '@/lib/momentum';
 import { useMarket } from '@/state/market';
+import { usePro } from '@/state/pro';
 import { colors, motion, radius, space } from '@/theme';
 
 type Featured = 'bitcoin' | 'ethereum' | 'solana';
@@ -28,6 +29,7 @@ type Filter = 'top' | 'gainers' | 'losers' | 'momentum';
 
 export default function Home() {
   const { coins, trending, offline, loading } = useMarket();
+  const { pro } = usePro();
   const [featuredId, setFeaturedId] = useState<Featured>('bitcoin');
   const [filter, setFilter] = useState<Filter>('top');
 
@@ -121,7 +123,7 @@ export default function Home() {
           </Animated.View>
 
           <Animated.View entering={FadeInDown.delay(140).duration(motion.base)}>
-            <PressableScale scaleTo={0.98} onPress={() => router.push('/profile')}>
+            <PressableScale scaleTo={0.98} onPress={() => router.push('/pro')}>
               <Glass style={styles.promo}>
                 <View style={{ flex: 1, gap: 6 }}>
                   <Txt size={16} weight="semibold">
@@ -132,7 +134,7 @@ export default function Home() {
                   </Txt>
                   <View style={styles.promoBtn}>
                     <Txt size={12} weight="semibold" color={colors.accentInk}>
-                      {strings.comingSoon}
+                      {pro ? strings.proActive : strings.proCta}
                     </Txt>
                   </View>
                 </View>

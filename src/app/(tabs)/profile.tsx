@@ -16,6 +16,7 @@ import { fetchServerPrices } from '@/lib/server-prices';
 import { callStats } from '@/lib/stats';
 import { useCalls } from '@/state/calls';
 import { useMarket } from '@/state/market';
+import { usePro } from '@/state/pro';
 import { useSession } from '@/state/session';
 import { PressableScale } from '@/components/pressable-scale';
 import { colors, motion, radius, space } from '@/theme';
@@ -24,6 +25,7 @@ export default function Profile() {
   const { calls } = useCalls();
   const { coins } = useMarket();
   const { user, signOut } = useSession();
+  const { pro } = usePro();
   const stats = callStats(calls);
   const serverPrices = useServerPrices(calls.filter((c) => c.status === 'open').map((c) => c.symbol));
 
@@ -50,6 +52,7 @@ export default function Profile() {
         <Stat label={strings.streak} value={stats.streak ? String(stats.streak) : '—'} />
       </View>
 
+      <PressableScale scaleTo={0.98} onPress={() => router.push('/pro')}>
       <Glass style={styles.pro}>
         <ProLogo size={44} />
         <View style={{ flex: 1, gap: 2 }}>
@@ -57,11 +60,12 @@ export default function Profile() {
             Callout Pro
           </Txt>
           <Txt size={12} color={colors.textMuted}>
-            {strings.premiumSubtitle}
+            {pro ? strings.proActive : strings.premiumSubtitle}
           </Txt>
         </View>
         <ChevronRight size={18} color={colors.textMuted} />
       </Glass>
+      </PressableScale>
 
       <Glass style={styles.list}>
         <Txt
