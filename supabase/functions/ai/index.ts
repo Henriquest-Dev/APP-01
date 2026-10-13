@@ -5,7 +5,9 @@
 // reading of the data and returns it. The OpenRouter key lives only here.
 //
 // Secrets (Supabase → Edge Functions → Secrets):
-//   OPENROUTER_API_KEY   your OpenRouter key (never put it in the app or in git)
+//   OPENROUTER_API_KEY   your OpenRouter key (never put it in the app or in git).
+//                        Optional: if unset, the key is read from the private table
+//                        public.app_secrets (name = 'openrouter_api_key').
 //   OPENROUTER_MODEL     optional, defaults to dots-studio/dots-3-note-preview:free
 //   AI_PER_USER_DAILY    optional, default 15
 //   AI_GLOBAL_DAILY      optional, default 400
@@ -190,6 +192,17 @@ if (typeof Deno !== 'undefined' && Deno.serve) {
       headers: { apikey: serviceKey, authorization: `Bearer ${serviceKey}`, 'content-type': 'application/json', ...(init.headers ?? {}) },
     });
 
+  let storedKey: string | null = null;
+  const apiKey = async () => {
+    const fromEnv = env('OPENROUTER_API_KEY');
+    if (fromEnv) return fromEnv;
+    if (!storedKey) {
+      const res = await rest('app_secrets?select=value&name=eq.openrouter_api_key');
+      storedKey = res.ok ? ((await res.json())[0]?.value ?? null) : null;
+    }
+    return storedKey;
+  };
+
   const deps: Deps = {
     cacheMs: 15 * 60_000,
     getUserId: async (jwt) => {
@@ -225,7 +238,7 @@ if (typeof Deno !== 'undefined' && Deno.serve) {
       const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
-          authorization: `Bearer ${env('OPENROUTER_API_KEY')}`,
+          authorization: `Bearer ${await apiKey()}`,
           'content-type': 'application/json',
           'x-title': 'Callout',
         },

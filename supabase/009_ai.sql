@@ -22,6 +22,16 @@ create table if not exists public.ai_cache (
 );
 alter table public.ai_cache enable row level security;   -- no policies: server only
 
+-- Private settings for server functions (API keys). RLS on and no policies:
+-- the app can never read it, only the Edge Functions (service role) can.
+create table if not exists public.app_secrets (
+  name text primary key,
+  value text not null,
+  updated_at timestamptz not null default now()
+);
+alter table public.app_secrets enable row level security;
+revoke all on public.app_secrets from anon, authenticated;
+
 -- Takes one use from today's per-person and global budget. Returns false when exhausted.
 create or replace function public.ai_take_quota(uid uuid, per_user int, per_day int)
 returns boolean
