@@ -1,11 +1,8 @@
-import Constants from 'expo-constants';
 import { router } from 'expo-router';
-import { Check, ChevronLeft, Globe, Info, LogOut, UserRound, type LucideIcon } from 'lucide-react-native';
+import { Check, ChevronLeft } from 'lucide-react-native';
 import { StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
-import { AnimatedLogo } from '@/components/animated-logo';
-import { Disclaimer } from '@/components/disclaimer';
 import { Glass } from '@/components/glass';
 import { IconButton } from '@/components/icon-button';
 import { PressableScale } from '@/components/pressable-scale';
@@ -13,13 +10,10 @@ import { Screen } from '@/components/screen';
 import { Txt } from '@/components/text';
 import { LANGUAGES, strings } from '@/i18n';
 import { useLanguage } from '@/state/language';
-import { useSession } from '@/state/session';
 import { colors, motion, radius, space } from '@/theme';
 
-export default function Settings() {
+export default function LanguageSettings() {
   const { language, change } = useLanguage();
-  const { user, signedIn, signOut } = useSession();
-
   return (
     <Screen
       withTabBar={false}
@@ -27,12 +21,11 @@ export default function Settings() {
         <View style={styles.header}>
           <IconButton icon={ChevronLeft} label="Back" onPress={() => router.back()} />
           <Txt size={17} weight="semibold">
-            {strings.settings}
+            {strings.language}
           </Txt>
           <View style={{ width: 42 }} />
         </View>
       }>
-      <SectionTitle icon={Globe} title={strings.language} />
       <Glass style={styles.card}>
         {LANGUAGES.map((l, i) => {
           const selected = l.code === language;
@@ -58,63 +51,7 @@ export default function Settings() {
           );
         })}
       </Glass>
-
-      {signedIn ? (
-        <>
-          <SectionTitle icon={UserRound} title={strings.account} />
-          <Glass style={styles.card}>
-            <View style={styles.row}>
-              <View style={{ flex: 1 }}>
-                <Txt size={15} weight="semibold">
-                  {user?.name ?? strings.guestName}
-                </Txt>
-                {user ? (
-                  <Txt size={13} color={colors.textMuted}>
-                    {user.email}
-                  </Txt>
-                ) : null}
-              </View>
-            </View>
-            <PressableScale
-              accessibilityRole="button"
-              onPress={signOut}
-              scaleTo={0.98}
-              style={[styles.row, styles.divider]}>
-              <LogOut size={18} color={colors.down} strokeWidth={2} />
-              <Txt size={15} weight="semibold" color={colors.down}>
-                {strings.signOut}
-              </Txt>
-            </PressableScale>
-          </Glass>
-        </>
-      ) : null}
-
-      <SectionTitle icon={Info} title={strings.about} />
-      <Glass style={[styles.card, styles.about]}>
-        <AnimatedLogo size={44} />
-        <View style={{ flex: 1 }}>
-          <Txt size={15} weight="semibold">
-            Callout
-          </Txt>
-          <Txt size={13} color={colors.textMuted}>
-            {strings.version} {Constants.expoConfig?.version ?? '1.0.0'}
-          </Txt>
-        </View>
-      </Glass>
-
-      <Disclaimer />
     </Screen>
-  );
-}
-
-function SectionTitle({ icon: Icon, title }: { icon: LucideIcon; title: string }) {
-  return (
-    <View style={styles.sectionTitle}>
-      <Icon size={15} color={colors.textMuted} strokeWidth={2} />
-      <Txt size={13} weight="semibold" color={colors.textMuted}>
-        {title.toUpperCase()}
-      </Txt>
-    </View>
   );
 }
 
@@ -125,15 +62,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: space.lg,
   },
-  sectionTitle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: space.xl,
-    marginTop: space.xl,
-    marginBottom: space.sm,
-  },
-  card: { marginHorizontal: space.lg, borderRadius: radius.md },
+  card: { marginHorizontal: space.lg, marginTop: space.md, borderRadius: radius.md },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -150,5 +79,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  about: { flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.lg },
 });

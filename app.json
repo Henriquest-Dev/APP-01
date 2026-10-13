@@ -44,7 +44,16 @@
       ],
       "expo-localization",
       "./plugins/with-release-signing",
-      "expo-sqlite"
+      "expo-sqlite",
+      "expo-video",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Callout needs access to your photos and videos so you can attach them to posts.",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

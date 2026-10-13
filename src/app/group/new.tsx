@@ -1,4 +1,4 @@
-import * as Haptics from 'expo-haptics';
+import { haptic } from '@/lib/haptics';
 import { router } from 'expo-router';
 import { Globe, Lock, X } from 'lucide-react-native';
 import { useState } from 'react';
@@ -33,7 +33,7 @@ export default function NewGroup() {
     setError(null);
     try {
       const id = await createGroup(name, description, privacy === 'public');
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      haptic.success();
       router.replace({ pathname: '/group/[id]', params: { id } });
     } catch {
       setError(strings.callFailed);

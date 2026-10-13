@@ -12,6 +12,7 @@ import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useEffect } from 'react';
 
+import { BlocksProvider } from '@/state/blocks';
 import { CallsProvider } from '@/state/calls';
 import { consumeReopenSettings, LanguageProvider } from '@/state/language';
 import { MarketProvider } from '@/state/market';
@@ -43,8 +44,10 @@ export default function RootLayout() {
         <SessionProvider>
           <MarketProvider>
             <CallsProvider>
-              {/* Re-mount the UI when the language changes so every screen re-reads its strings. */}
-              <LanguageProvider>{(language) => <RootStack key={language} />}</LanguageProvider>
+              <BlocksProvider>
+                {/* Re-mount the UI when the language changes so every screen re-reads its strings. */}
+                <LanguageProvider>{(language) => <RootStack key={language} />}</LanguageProvider>
+              </BlocksProvider>
             </CallsProvider>
           </MarketProvider>
         </SessionProvider>
@@ -85,6 +88,11 @@ function RootStack() {
         <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
         <Stack.Screen name="coin/[id]" />
         <Stack.Screen name="group/[id]" />
+        <Stack.Screen name="post/[id]" />
+        <Stack.Screen
+          name="post/new"
+          options={{ presentation: 'modal', animation: 'slide_from_bottom', gestureDirection: 'vertical' }}
+        />
         <Stack.Screen
           name="group/new"
           options={{ presentation: 'modal', animation: 'slide_from_bottom', gestureDirection: 'vertical' }}
@@ -94,7 +102,10 @@ function RootStack() {
           options={{ presentation: 'modal', animation: 'slide_from_bottom', gestureDirection: 'vertical' }}
         />
       </Stack.Protected>
-      <Stack.Screen name="settings" />
+      <Stack.Screen name="settings/index" />
+      <Stack.Screen name="settings/language" />
+      <Stack.Screen name="settings/blocked" />
+      <Stack.Screen name="legal" />
     </Stack>
   );
 }

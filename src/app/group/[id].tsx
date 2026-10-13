@@ -1,5 +1,16 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { ChevronLeft, Globe, Lock, LogOut, Megaphone, SendHorizontal, Share2, X } from 'lucide-react-native';
+import {
+  Ban,
+  ChevronLeft,
+  Flag,
+  Globe,
+  Lock,
+  LogOut,
+  Megaphone,
+  SendHorizontal,
+  Share2,
+  X,
+} from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -16,6 +27,7 @@ import {
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ActionSheet } from '@/components/action-sheet';
 import { Background } from '@/components/background';
 import { FeedCallCard } from '@/components/feed-call-card';
 import { IconButton } from '@/components/icon-button';
@@ -34,6 +46,8 @@ import {
   type Message,
 } from '@/lib/community';
 import { formatAgo, formatPrice } from '@/lib/format';
+import { report } from '@/lib/safety';
+import { useBlocks } from '@/state/blocks';
 import { useCalls } from '@/state/calls';
 import { useMarket } from '@/state/market';
 import { useSession } from '@/state/session';
@@ -63,7 +77,10 @@ export default function GroupChat() {
   }, [id, user]);
 
   const canRead = !!group && (group.isPublic || member);
-  const { messages, calls } = useMessages(id, canRead);
+  const { isBlocked, block } = useBlocks();
+  const [selected, setSelected] = useState<Message | null>(null);
+  const { messages: rawMessages, calls } = useMessages(id, canRead);
+  const messages = rawMessages?.filter((m) => !isBlocked(m.userId)) ?? null;
 
   const send = async (callId?: string) => {
     const body = text.trim();
@@ -180,6 +197,7 @@ export default function GroupChat() {
             }
             renderItem={({ item, index }) => (
               <Bubble
+                onLongPress={item.userId !== user?.id ? () => setSelected(item) : undefined}
                 message={item}
                 mine={item.userId === user?.id}
                 showName={(messages ?? [])[index + 1]?.userId !== item.userId}
@@ -238,6 +256,34 @@ export default function GroupChat() {
           ) : null}
         </View>
 
+        <ActionSheet
+          visible={!!selected}
+          onClose={() => setSelected(null)}
+          actions={
+            selected
+              ? [
+                  {
+                    label: strings.report,
+                    icon: Flag,
+                    onPress: () =>
+                      report('message', String(selected.id))
+                        .then(() => setError(strings.reportThanks))
+                        .catch(() => setError(strings.callFailed)),
+                  },
+                  {
+                    label: `${strings.blockUser} @${selected.username}`,
+                    icon: Ban,
+                    destructive: true,
+                    onPress: () =>
+                      block(selected.userId, selected.username)
+                        .then(() => setError(strings.blockedNotice))
+                        .catch(() => setError(strings.callFailed)),
+                  },
+                ]
+              : []
+          }
+        />
+
         <Modal visible={picker} transparent animationType="slide" onRequestClose={() => setPicker(false)}>
           <Pressable style={styles.backdrop} onPress={() => setPicker(false)} />
           <View style={[styles.sheet, { paddingBottom: insets.bottom + space.lg }]}>
@@ -282,12 +328,14 @@ export default function GroupChat() {
 }
 
 function Bubble({
+  onLongPress,
   message,
   mine,
   showName,
   call,
   livePrice,
 }: {
+  onLongPress?: () => void;
   message: Message;
   mine: boolean;
   showName: boolean;
@@ -299,33 +347,38 @@ function Bubble({
     <Animated.View
       entering={FadeInUp.duration(220)}
       style={[styles.bubbleWrap, mine ? styles.right : styles.left]}>
-      {showName && !mine ? (
-        <Txt
-          size={12}
-          weight="semibold"
-          color={colors.accentBright}
-          style={{ marginBottom: 3, marginLeft: 4 }}>
-          @{message.username}
-        </Txt>
-      ) : null}
-      {message.callId ? (
-        <View style={{ width: 300, maxWidth: '100%' }}>
-          {call ? (
-            <FeedCallCard call={call} livePrice={livePrice} compact isMine={mine} />
-          ) : (
-            <ActivityIndicator color={colors.accent} />
-          )}
-        </View>
-      ) : (
-        <View style={[styles.bubble, mine ? styles.bubbleMine : styles.bubbleOther]}>
-          <Txt size={15} color={mine ? colors.accentInk : colors.text} style={{ lineHeight: 20 }}>
-            {message.body}
+      <Pressable
+        onLongPress={onLongPress}
+        delayLongPress={350}
+        style={{ alignItems: mine ? 'flex-end' : 'flex-start' }}>
+        {showName && !mine ? (
+          <Txt
+            size={12}
+            weight="semibold"
+            color={colors.accentBright}
+            style={{ marginBottom: 3, marginLeft: 4 }}>
+            @{message.username}
           </Txt>
-        </View>
-      )}
-      <Txt size={10} color={colors.textFaint} style={{ marginTop: 3, marginHorizontal: 6 }}>
-        {ago}
-      </Txt>
+        ) : null}
+        {message.callId ? (
+          <View style={{ width: 300, maxWidth: '100%' }}>
+            {call ? (
+              <FeedCallCard call={call} livePrice={livePrice} compact isMine={mine} />
+            ) : (
+              <ActivityIndicator color={colors.accent} />
+            )}
+          </View>
+        ) : (
+          <View style={[styles.bubble, mine ? styles.bubbleMine : styles.bubbleOther]}>
+            <Txt size={15} color={mine ? colors.accentInk : colors.text} style={{ lineHeight: 20 }}>
+              {message.body}
+            </Txt>
+          </View>
+        )}
+        <Txt size={10} color={colors.textFaint} style={{ marginTop: 3, marginHorizontal: 6 }}>
+          {ago}
+        </Txt>
+      </Pressable>
     </Animated.View>
   );
 }

@@ -1,4 +1,4 @@
-import * as Haptics from 'expo-haptics';
+import { haptic } from '@/lib/haptics';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Check, TrendingDown, TrendingUp, X } from 'lucide-react-native';
 import { useState } from 'react';
@@ -82,11 +82,11 @@ export default function NewCall() {
     });
     setBusy(false);
     if (result) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      haptic.error();
       setError(callMessage(result));
       return;
     }
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    haptic.success();
     router.dismissTo('/profile');
   };
 

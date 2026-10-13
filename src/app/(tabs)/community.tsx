@@ -2,11 +2,12 @@ import { router, useFocusEffect } from 'expo-router';
 import { ChevronRight, Globe, KeyRound, Lock, Plus, Users } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, StyleSheet, TextInput, View } from 'react-native';
-import Animated, { FadeInDown, LinearTransition } from 'react-native-reanimated';
+import Animated, { FadeInDown, FadeInUp, FadeOut, LinearTransition } from 'react-native-reanimated';
 
 import { FeedCallCard } from '@/components/feed-call-card';
 import { Glass } from '@/components/glass';
 import { LiveDot } from '@/components/live-dot';
+import { PostList } from '@/components/post-list';
 import { PressableScale } from '@/components/pressable-scale';
 import { Screen } from '@/components/screen';
 import { Segmented } from '@/components/segmented';
@@ -15,17 +16,36 @@ import { useCallFeed } from '@/hooks/use-call-feed';
 import { strings } from '@/i18n';
 import { fetchGroups, joinGroup, joinGroupByCode, type Group } from '@/lib/community';
 import { formatAgo } from '@/lib/format';
+import { useBlocks } from '@/state/blocks';
 import { useMarket } from '@/state/market';
 import { useSession } from '@/state/session';
 import { colors, fonts, motion, radius, space } from '@/theme';
 
-type Tab = 'feed' | 'groups';
+type Tab = 'feed' | 'posts' | 'groups';
 type Scope = 'all' | 'mine';
 
 export default function Community() {
   const [tab, setTab] = useState<Tab>('feed');
+  const [notice, setNotice] = useState<string | null>(null);
+  const showNotice = (text: string) => {
+    setNotice(text);
+    setTimeout(() => setNotice(null), 3000);
+  };
   return (
-    <Screen keyboardShouldPersistTaps="handled">
+    <Screen
+      keyboardShouldPersistTaps="handled"
+      footer={
+        notice ? (
+          <Animated.View
+            entering={FadeInUp.duration(200)}
+            exiting={FadeOut.duration(200)}
+            style={styles.toast}>
+            <Txt size={13} color={colors.text} style={{ textAlign: 'center' }}>
+              {notice}
+            </Txt>
+          </Animated.View>
+        ) : null
+      }>
       <View style={styles.title}>
         <Txt size={28} weight="semibold">
           {strings.community}
@@ -37,12 +57,13 @@ export default function Community() {
           value={tab}
           onChange={setTab}
           options={[
-            { value: 'feed', label: strings.feed },
+            { value: 'feed', label: strings.callsTab },
+            { value: 'posts', label: strings.posts },
             { value: 'groups', label: strings.groups },
           ]}
         />
       </View>
-      {tab === 'feed' ? <Feed /> : <Groups />}
+      {tab === 'feed' ? <Feed /> : tab === 'posts' ? <PostList onNotice={showNotice} /> : <Groups />}
     </Screen>
   );
 }
@@ -51,10 +72,12 @@ function Feed() {
   const { user } = useSession();
   const { coins } = useMarket();
   const [scope, setScope] = useState<Scope>('all');
-  const { calls, freshIds } = useCallFeed({
+  const { isBlocked } = useBlocks();
+  const { calls: rawCalls, freshIds } = useCallFeed({
     userId: scope === 'mine' ? user?.id : undefined,
     enabled: scope === 'all' || !!user,
   });
+  const calls = rawCalls?.filter((c) => !isBlocked(c.userId)) ?? null;
   const priceOf = (coinId: string) => coins.find((c) => c.id === coinId)?.price;
 
   return (
@@ -300,6 +323,17 @@ function Empty({ text }: { text: string }) {
 }
 
 const styles = StyleSheet.create({
+  toast: {
+    position: 'absolute',
+    left: space.lg,
+    right: space.lg,
+    bottom: 110,
+    padding: space.md,
+    borderRadius: radius.md,
+    backgroundColor: colors.surfaceSolid,
+    borderWidth: 1,
+    borderColor: colors.accent,
+  },
   title: {
     flexDirection: 'row',
     alignItems: 'center',

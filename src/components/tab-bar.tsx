@@ -1,4 +1,4 @@
-import * as Haptics from 'expo-haptics';
+import { haptic } from '@/lib/haptics';
 import { router } from 'expo-router';
 import type { BottomTabBarProps } from 'expo-router/tabs';
 import { House, MessagesSquare, Plus, Trophy, UserRound, type LucideIcon } from 'lucide-react-native';
@@ -47,7 +47,7 @@ export function TabBar({ state, navigation, descriptors, insets }: BottomTabBarP
         onPress={() => {
           const event = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
           if (!focused && !event.defaultPrevented) {
-            Haptics.selectionAsync();
+            haptic.tap();
             navigation.navigate(route.name);
           }
         }}
@@ -63,7 +63,7 @@ export function TabBar({ state, navigation, descriptors, insets }: BottomTabBarP
       accessibilityRole="button"
       accessibilityLabel={strings.newCall}
       onPress={() => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        haptic.impact();
         router.push('/call/new');
       }}
       style={({ pressed }) => [styles.center, pressed && { transform: [{ scale: 0.92 }] }]}>

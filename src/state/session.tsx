@@ -23,6 +23,9 @@ type SessionState = LocalFlags & {
   signIn: (email: string, password: string) => Promise<AuthError | null>;
   continueAsGuest: () => void;
   signOut: () => Promise<void>;
+  updateName: (name: string) => Promise<boolean>;
+  changePassword: (password: string) => Promise<AuthError | null>;
+  deleteAccount: () => Promise<boolean>;
 };
 
 const KEY = 'callout.session.v1';
@@ -128,6 +131,32 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       updateFlags({ guest: false });
       await supabase.auth.signOut().catch(() => {});
       setUser(null);
+    },
+    updateName: async (name) => {
+      if (!user) return false;
+      const clean = name.trim().slice(0, 40);
+      const { error } = await supabase.from('profiles').update({ username: clean }).eq('id', user.id);
+      if (error) return false;
+      await supabase.auth.updateUser({ data: { name: clean } }).catch(() => {});
+      setUser({ ...user, name: clean });
+      return true;
+    },
+    changePassword: async (password) => {
+      const { error } = await supabase.auth.updateUser({ password });
+      return error ? mapError(error.message) : null;
+    },
+    deleteAccount: async () => {
+      if (!user) return false;
+      // Remove the user's uploaded media first (the database cascade can't reach storage).
+      const { data: files } = await supabase.storage.from('media').list(user.id, { limit: 1000 });
+      if (files?.length)
+        await supabase.storage.from('media').remove(files.map((f) => `${user.id}/${f.name}`));
+      const { error } = await supabase.rpc('delete_my_account');
+      if (error) return false;
+      await supabase.auth.signOut({ scope: 'local' }).catch(() => {});
+      updateFlags({ guest: false });
+      setUser(null);
+      return true;
     },
   };
 
