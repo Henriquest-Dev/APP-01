@@ -2,7 +2,7 @@
   "expo": {
     "name": "Callout",
     "slug": "callout",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "callout",
@@ -13,7 +13,7 @@
     },
     "android": {
       "package": "com.henriquest.callout",
-      "versionCode": 4,
+      "versionCode": 5,
       "adaptiveIcon": {
         "backgroundColor": "#0B0C14",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
