@@ -288,6 +288,16 @@ export const en = {
   returnedTrending: 'Back in trending',
   leftTrending: 'Left trending {ago} ago',
   catalogEmpty: 'The catalog is filling up. Coins appear here as they trend.',
+  notifEmpty: 'Nothing yet. You will see your call results and new followers here.',
+  notifSetting: 'Notifications',
+  notifSettingHint: 'Call results and new followers.',
+  notifDenied: 'Notifications are blocked. Turn them on in your phone settings.',
+  notifCallHitTitle: 'Your {symbol} call hit',
+  notifCallHitBody: 'The market played out the way you called it. Open Callout to see the result.',
+  notifCallMissTitle: 'Your {symbol} call missed',
+  notifCallMissBody: 'The market went another way this time. See the details in Callout.',
+  notifFollowTitle: 'New follower',
+  notifFollowBody: '@{handle} started following you.',
 };
 
 export type Strings = typeof en;

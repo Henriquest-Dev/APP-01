@@ -58,7 +58,14 @@
           "microphonePermission": false
         }
       ],
-      "expo-iap"
+      "expo-iap",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/notification-icon.png",
+          "color": "#8B6CFF"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { Flame, Plus, Search, Settings2, Trophy, WifiOff, type LucideIcon } from 'lucide-react-native';
+import { Bell, Flame, Plus, Search, Settings2, Trophy, WifiOff, type LucideIcon } from 'lucide-react-native';
 import { useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
@@ -20,6 +20,7 @@ import { strings } from '@/i18n';
 import { formatPrice } from '@/lib/format';
 import { isStablecoin, momentumScore } from '@/lib/momentum';
 import { useMarket } from '@/state/market';
+import { useNotifications } from '@/state/notifications';
 import { usePro } from '@/state/pro';
 import { colors, motion, radius, space } from '@/theme';
 
@@ -29,6 +30,7 @@ type Filter = 'top' | 'gainers' | 'losers' | 'momentum';
 export default function Home() {
   const { coins, trending, offline, loading } = useMarket();
   const { pro } = usePro();
+  const { unread } = useNotifications();
   const [featuredId, setFeaturedId] = useState<Featured>('bitcoin');
   const [filter, setFilter] = useState<Filter>('top');
 
@@ -59,6 +61,12 @@ export default function Home() {
             icon={Search}
             label={strings.searchPlaceholder}
             onPress={() => router.push('/markets')}
+          />
+          <IconButton
+            icon={Bell}
+            label={strings.notifications}
+            badge={unread}
+            onPress={() => router.push('/notifications')}
           />
           <IconButton icon={Settings2} label={strings.settings} onPress={() => router.push('/settings')} />
         </View>

@@ -4,6 +4,7 @@ import {
   Sparkles,
   AtSign,
   Ban,
+  Bell,
   Bookmark,
   ChevronLeft,
   FileText,
@@ -20,7 +21,7 @@ import {
   Vibrate,
 } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
-import { StyleSheet, Switch, View } from 'react-native';
+import { Alert, StyleSheet, Switch, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { AnimatedLogo } from '@/components/animated-logo';
@@ -35,6 +36,7 @@ import { fetchCard, updateBio, updateHandle } from '@/lib/social';
 import { haptic, hapticsEnabled, setHapticsEnabled } from '@/lib/haptics';
 import { useBlocks } from '@/state/blocks';
 import { useLanguage } from '@/state/language';
+import { useNotifications } from '@/state/notifications';
 import { usePro } from '@/state/pro';
 import { useSession } from '@/state/session';
 import { colors, motion, radius, space } from '@/theme';
@@ -44,6 +46,7 @@ type Dialog = 'name' | 'password' | 'delete' | 'signOut' | null | 'handle' | 'bi
 export default function Settings() {
   const { language } = useLanguage();
   const { pro } = usePro();
+  const { enabled: pushOn, setEnabled: setPushOn } = useNotifications();
   const { user, guest, signOut, updateName, changePassword, deleteAccount } = useSession();
   const { blocked } = useBlocks();
   const [dialog, setDialog] = useState<Dialog>(null);
@@ -152,6 +155,26 @@ export default function Settings() {
           value={languageName}
           onPress={() => router.push('/settings/language')}
         />
+        {user ? (
+          <SettingsRow
+            icon={Bell}
+            label={strings.notifSetting}
+            right={
+              <Switch
+                value={pushOn}
+                onValueChange={async (on) => {
+                  const result = await setPushOn(on);
+                  if (on && result === 'denied') {
+                    await setPushOn(false);
+                    Alert.alert(strings.notifSetting, strings.notifDenied);
+                  }
+                }}
+                trackColor={{ false: colors.surfaceRaised, true: colors.accent }}
+                thumbColor="#FFFFFF"
+              />
+            }
+          />
+        ) : null}
         <SettingsRow
           icon={Vibrate}
           label={strings.vibration}
