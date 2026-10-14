@@ -283,4 +283,11 @@ export const ru: Strings = {
   aiSecRisks: 'Риски',
   aiListen: 'Слушать',
   aiStop: 'Стоп',
+  marketTab: 'Рынок',
+  catalogTab: 'Каталог',
+  catalogHint: 'Каждая монета, побывавшая в трендах, остаётся здесь и может вернуться.',
+  inTrending: 'В тренде сейчас',
+  returnedTrending: 'Снова в тренде',
+  leftTrending: 'Вышла из трендов {ago} назад',
+  catalogEmpty: 'Каталог наполняется. Монеты появляются здесь, когда попадают в тренды.',
 };

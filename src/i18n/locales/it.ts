@@ -282,4 +282,11 @@ export const it: Strings = {
   aiSecRisks: 'Rischi',
   aiListen: 'Ascolta',
   aiStop: 'Stop',
+  marketTab: 'Mercato',
+  catalogTab: 'Catalogo',
+  catalogHint: 'Ogni moneta che è stata in tendenza resta qui, pronta a tornare.',
+  inTrending: 'In tendenza ora',
+  returnedTrending: 'Di nuovo in tendenza',
+  leftTrending: 'Uscita dalle tendenze {ago} fa',
+  catalogEmpty: 'Il catalogo si sta riempiendo. Le monete appaiono qui quando entrano in tendenza.',
 };

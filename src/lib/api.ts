@@ -73,3 +73,16 @@ export async function fetchChart(id: string, days: ChartRange): Promise<number[]
   );
   return data.prices.map(([, price]) => price);
 }
+
+/** Prices for specific coins (used by the catalog). Chunked to keep the URL short. */
+export async function fetchMarketsByIds(ids: string[]): Promise<Coin[]> {
+  const out: Coin[] = [];
+  for (let i = 0; i < ids.length; i += 80) {
+    const chunk = ids.slice(i, i + 80).map(encodeURIComponent).join(',');
+    const rows = await get<any[]>(
+      `/coins/markets?vs_currency=usd&ids=${chunk}&per_page=80&page=1&sparkline=true&price_change_percentage=24h`,
+    );
+    out.push(...rows.map(toCoin));
+  }
+  return out;
+}

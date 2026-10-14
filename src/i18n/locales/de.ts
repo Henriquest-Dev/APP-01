@@ -284,4 +284,11 @@ export const de: Strings = {
   aiSecRisks: 'Risiken',
   aiListen: 'Vorlesen',
   aiStop: 'Stopp',
+  marketTab: 'Markt',
+  catalogTab: 'Katalog',
+  catalogHint: 'Jede Münze, die im Trend war, bleibt hier und kann zurückkehren.',
+  inTrending: 'Gerade im Trend',
+  returnedTrending: 'Wieder im Trend',
+  leftTrending: 'Vor {ago} aus den Trends gefallen',
+  catalogEmpty: 'Der Katalog füllt sich. Münzen erscheinen hier, sobald sie im Trend sind.',
 };

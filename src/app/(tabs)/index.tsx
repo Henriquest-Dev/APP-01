@@ -153,7 +153,7 @@ export default function Home() {
                     inset={false}
                     title={strings.trending}
                     action={strings.seeAll}
-                    onAction={() => router.push('/markets')}
+                    onAction={() => router.push({ pathname: '/markets', params: { tab: 'catalog' } })}
                   />
                 </View>
                 {trending.slice(0, 5).map((c, i) => (
@@ -196,7 +196,6 @@ export default function Home() {
           </Animated.View>
         </>
       )}
-
     </Screen>
   );
 }

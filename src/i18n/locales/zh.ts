@@ -280,4 +280,11 @@ export const zh: Strings = {
   aiSecRisks: '风险',
   aiListen: '朗读',
   aiStop: '停止',
+  marketTab: '市场',
+  catalogTab: '目录',
+  catalogHint: '所有上过热门的币都会保留在这里，随时可能再次上榜。',
+  inTrending: '当前热门',
+  returnedTrending: '重回热门',
+  leftTrending: '{ago}前退出热门',
+  catalogEmpty: '目录正在充实。币种登上热门后会出现在这里。',
 };

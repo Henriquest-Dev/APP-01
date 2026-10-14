@@ -281,6 +281,13 @@ export const en = {
   aiSecRisks: 'Risks',
   aiListen: 'Listen',
   aiStop: 'Stop',
+  marketTab: 'Market',
+  catalogTab: 'Catalog',
+  catalogHint: 'Every coin that has trended stays here, ready to come back.',
+  inTrending: 'Trending now',
+  returnedTrending: 'Back in trending',
+  leftTrending: 'Left trending {ago} ago',
+  catalogEmpty: 'The catalog is filling up. Coins appear here as they trend.',
 };
 
 export type Strings = typeof en;

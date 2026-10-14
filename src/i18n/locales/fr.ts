@@ -286,4 +286,11 @@ export const fr: Strings = {
   aiSecRisks: 'Risques',
   aiListen: 'Écouter',
   aiStop: 'Arrêter',
+  marketTab: 'Marché',
+  catalogTab: 'Catalogue',
+  catalogHint: 'Chaque crypto qui a été tendance reste ici, prête à revenir.',
+  inTrending: 'En tendance',
+  returnedTrending: 'De retour en tendance',
+  leftTrending: 'Sortie des tendances il y a {ago}',
+  catalogEmpty: 'Le catalogue se remplit. Les cryptos apparaissent ici quand elles sont tendance.',
 };

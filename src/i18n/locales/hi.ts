@@ -282,4 +282,11 @@ export const hi: Strings = {
   aiSecRisks: 'जोखिम',
   aiListen: 'सुनें',
   aiStop: 'रोकें',
+  marketTab: 'बाज़ार',
+  catalogTab: 'कैटलॉग',
+  catalogHint: 'जो भी कॉइन ट्रेंड में रहा है वह यहाँ रहता है, लौटने के लिए तैयार।',
+  inTrending: 'अभी ट्रेंड में',
+  returnedTrending: 'फिर ट्रेंड में',
+  leftTrending: '{ago} पहले ट्रेंड से बाहर हुआ',
+  catalogEmpty: 'कैटलॉग भर रहा है। कॉइन ट्रेंड में आने पर यहाँ दिखते हैं।',
 };

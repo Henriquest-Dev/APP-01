@@ -283,4 +283,11 @@ export const tr: Strings = {
   aiSecRisks: 'Riskler',
   aiListen: 'Dinle',
   aiStop: 'Durdur',
+  marketTab: 'Piyasa',
+  catalogTab: 'Katalog',
+  catalogHint: 'Trend olmuş her coin burada kalır ve geri dönmeye hazır bekler.',
+  inTrending: 'Şu an trendde',
+  returnedTrending: 'Yeniden trendde',
+  leftTrending: '{ago} önce trendden çıktı',
+  catalogEmpty: 'Katalog doluyor. Coinler trend olduğunda burada görünür.',
 };

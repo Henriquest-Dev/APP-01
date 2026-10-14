@@ -1,0 +1,38 @@
+env: load .env
+env: export EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY EXPO_PUBLIC_SUPABASE_URL
+Starting project at /home/user/APP-01
+🔍 [expo-iap] Config values: horizonAppId=undefined, pinnedStore=auto, amazonAppstoreKey=none, vega=auto, onside=false
+📦 [expo-iap] Using OpenIAP from CocoaPods
+Using src/app as the root directory for Expo Router.
+React Compiler enabled
+ ERROR  An unknown error occurred while installing React Native DevTools. Details:
+
+[1014/060508.917984:FATAL:electron/shell/app/electron_main_delegate.cc:313] Running as root without --no-sandbox is not supported. See https://crbug.com/638180.
+
+Metro is running in CI mode, reloads are disabled. Remove CI=true to enable watch mode.
+Starting Metro Bundler
+
+warning: Bundler cache is empty, rebuilding (this may take a minute)
+Waiting on http://localhost:8081
+
+Logs for your project will appear below.
+| 🔍 [expo-iap] Config values: horizonAppId=undefined, pinnedStore=auto, amazonAppstoreKey=none, vega=auto, onside=false
+| 📦 [expo-iap] Using OpenIAP from CocoaPods
+λ Bundled 36599ms node_modules/expo/node_modules/@expo/cli/node_modules/@expo/router-server/node/render.js (3536 modules)
+Web Bundled 37723ms node_modules/expo-router/entry.js (3572 modules)
+λ Bundled 99ms node_modules/expo/node_modules/@expo/cli/node_modules/@expo/router-server/node/render.js (1 module)
+Web Bundled 582ms node_modules/expo-router/entry.js (1 module)
+Web Bundled 17102ms node_modules/expo-router/entry.js (3572 modules)
+Web  INFO  %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+Web  LOG  Running application "main" with appParams:
+ {"hydrate": undefined, "rootTag": "#root"} 
+Development-level warnings: ON.
+Performance optimizations: OFF.
+λ Bundled 114ms node_modules/expo/node_modules/@expo/cli/node_modules/@expo/router-server/node/render.js (1 module)
+Web Bundled 1186ms node_modules/expo-router/entry.js (1 module)
+Web Bundled 204ms node_modules/expo-router/entry.js (1 module)
+Web  INFO  %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+Web  LOG  Running application "main" with appParams:
+ {"hydrate": undefined, "rootTag": "#root"} 
+Development-level warnings: ON.
+Performance optimizations: OFF.
