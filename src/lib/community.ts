@@ -41,6 +41,7 @@ export type Message = {
   username: string;
   body: string;
   callId: string | null;
+  stickerId: string | null;
   createdAt: number;
 };
 
@@ -170,7 +171,7 @@ export async function fetchUsernames(ids: string[]): Promise<Record<string, stri
 export async function fetchMessages(groupId: string, limit = 60): Promise<Message[]> {
   const { data } = await supabase
     .from('messages')
-    .select('id, group_id, user_id, body, call_id, created_at, profiles(username)')
+    .select('id, group_id, user_id, body, call_id, sticker_id, created_at, profiles(username)')
     .eq('group_id', groupId)
     .order('id', { ascending: false })
     .limit(limit);
@@ -181,14 +182,20 @@ export async function fetchMessages(groupId: string, limit = 60): Promise<Messag
     username: r.profiles?.username ?? '',
     body: r.body,
     callId: r.call_id,
+    stickerId: r.sticker_id ?? null,
     createdAt: Date.parse(r.created_at),
   }));
 }
 
-export async function sendMessage(groupId: string, body: string, callId?: string) {
+export async function sendMessage(groupId: string, body: string, callId?: string, stickerId?: string) {
   const { error } = await supabase
     .from('messages')
-    .insert({ group_id: groupId, body, call_id: callId ?? null });
+    .insert({
+      group_id: groupId,
+      body,
+      call_id: callId ?? null,
+      ...(stickerId ? { sticker_id: stickerId } : {}),
+    });
   if (error) throw error;
 }
 

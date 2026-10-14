@@ -8,6 +8,7 @@ import { strings } from '@/i18n';
 import type { FeedCall } from '@/lib/community';
 import { formatAgo, formatPercent, formatPrice, formatTimeLeft } from '@/lib/format';
 import { colors, radius, space } from '@/theme';
+import { Avatar } from './avatar';
 import { CoinAvatar } from './coin-avatar';
 import { PressableScale } from './pressable-scale';
 import { Txt } from './text';
@@ -61,11 +62,7 @@ export function FeedCallCard({ call, livePrice, fresh, compact, isMine }: Props)
             scaleTo={0.96}
             onPress={() => router.push({ pathname: '/user/[id]', params: { id: call.userId } })}
             style={styles.author}>
-            <View style={styles.user}>
-              <Txt size={12} weight="bold">
-                {call.username[0]?.toUpperCase() ?? '?'}
-              </Txt>
-            </View>
+            <Avatar userId={call.userId} name={call.username} size={24} />
             <Txt size={13} weight="semibold" numberOfLines={1} style={{ flexShrink: 1 }}>
               @{call.username}
             </Txt>

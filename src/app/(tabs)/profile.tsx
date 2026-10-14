@@ -7,16 +7,18 @@ import { StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { CoinAvatar } from '@/components/coin-avatar';
-import { Badges } from '@/components/badges';
 import { Glass } from '@/components/glass';
 import { PostList } from '@/components/post-list';
-import { Segmented } from '@/components/segmented';
+import { ProfileHeader } from '@/components/profile-header';
+import { StickerGrid } from '@/components/sticker-grid';
+import { UnderlineTabs } from '@/components/underline-tabs';
 import { Screen } from '@/components/screen';
 import { Txt } from '@/components/text';
 import { strings } from '@/i18n';
-import { badgesFor } from '@/lib/badges';
+import { fetchLabels, fetchStickers, type Label, type Sticker } from '@/lib/profile';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { fetchCard, type ProfileCard } from '@/lib/social';
-import { formatCount, formatPercent, formatPrice, formatTimeLeft } from '@/lib/format';
+import { formatPercent, formatPrice, formatTimeLeft } from '@/lib/format';
 import { fetchServerPrices } from '@/lib/server-prices';
 import { callStats } from '@/lib/stats';
 import { useCalls } from '@/state/calls';
@@ -26,13 +28,44 @@ import { useSession } from '@/state/session';
 import { PressableScale } from '@/components/pressable-scale';
 import { colors, motion, radius, space } from '@/theme';
 
+type Tab = 'calls' | 'posts' | 'stickers';
+
+/** Shown for a moment (or when the server has no profile card yet). */
+function fallbackCard(id: string, name: string): ProfileCard {
+  return {
+    id,
+    username: name,
+    handle:
+      name
+        .toLowerCase()
+        .replace(/[^a-z0-9_]/g, '')
+        .slice(0, 20) || 'callout',
+    bio: '',
+    createdAt: Date.now(),
+    followers: 0,
+    following: 0,
+    callsTotal: 0,
+    callsResolved: 0,
+    callsHits: 0,
+    pro: false,
+    avatarUrl: null,
+    bannerUrl: null,
+    bannerColor: null,
+    location: '',
+    website: '',
+  };
+}
+
 export default function Profile() {
   const { calls } = useCalls();
   const { coins } = useMarket();
   const { user, signOut } = useSession();
   const { pro } = usePro();
   const stats = callStats(calls);
-  const [tab, setTab] = useState<'calls' | 'posts'>('calls');
+  const [tab, setTab] = useState<Tab>('calls');
+  const [labels, setLabels] = useState<Label[]>([]);
+  const [stickers, setStickers] = useState<Sticker[]>([]);
+  const insets = useSafeAreaInsets();
   const [notice, setNotice] = useState<string | null>(null);
   const [card, setCard] = useState<ProfileCard | null>(null);
   const userId = user?.id;
@@ -42,6 +75,8 @@ export default function Profile() {
       if (!userId) return;
       let alive = true;
       fetchCard(userId).then((c) => alive && setCard(c));
+      fetchLabels(userId).then((l) => alive && setLabels(l));
+      fetchStickers(userId).then((x) => alive && setStickers(x));
       return () => {
         alive = false;
       };
@@ -50,42 +85,31 @@ export default function Profile() {
   const serverPrices = useServerPrices(calls.filter((c) => c.status === 'open').map((c) => c.symbol));
 
   return (
-    <Screen>
-      <View style={styles.head}>
-        <View style={styles.avatar}>
-          <UserRound size={28} color={colors.text} strokeWidth={1.8} />
-        </View>
-        <View style={{ gap: 2, flex: 1 }}>
-          <Txt size={20} weight="semibold">
-            {user?.name ?? strings.guestName}
-          </Txt>
-          <Txt size={13} color={colors.textMuted}>
-            {card ? `@${card.handle}` : (user?.email ?? strings.memberSince)}
-          </Txt>
-        </View>
-        <IconButton icon={Settings2} label={strings.settings} onPress={() => router.push('/settings')} />
-      </View>
-
-      {card ? (
-        <View style={styles.social}>
-          {card.bio ? <Txt size={14}>{card.bio}</Txt> : null}
-          <View style={{ flexDirection: 'row', gap: space.xl }}>
-            <Txt size={13} color={colors.textMuted}>
-              <Txt size={13} weight="bold">
-                {formatCount(card.followers)}
-              </Txt>{' '}
-              {strings.followers}
+    <Screen contentContainerStyle={user ? { paddingTop: 0 } : undefined}>
+      {user ? (
+        <ProfileHeader
+          card={card ?? fallbackCard(user.id, user.name)}
+          labels={labels}
+          mine
+          topInset={insets.top}
+          onEdit={() => router.push('/profile/edit')}
+        />
+      ) : (
+        <View style={styles.head}>
+          <View style={styles.avatar}>
+            <UserRound size={28} color={colors.text} strokeWidth={1.8} />
+          </View>
+          <View style={{ gap: 2, flex: 1 }}>
+            <Txt size={20} weight="semibold">
+              {strings.guestName}
             </Txt>
             <Txt size={13} color={colors.textMuted}>
-              <Txt size={13} weight="bold">
-                {formatCount(card.following)}
-              </Txt>{' '}
-              {strings.followingLabel}
+              {strings.memberSince}
             </Txt>
           </View>
-          <Badges badges={badgesFor(card)} />
+          <IconButton icon={Settings2} label={strings.settings} onPress={() => router.push('/settings')} />
         </View>
-      ) : null}
+      )}
 
       <View style={styles.stats}>
         <Stat label={strings.callsMade} value={String(stats.total)} />
@@ -109,20 +133,24 @@ export default function Profile() {
       </PressableScale>
 
       {user ? (
-        <View style={{ marginBottom: space.md }}>
-          <Segmented<'calls' | 'posts'>
-            size="sm"
+        <View style={{ marginTop: space.lg }}>
+          <UnderlineTabs<Tab>
             value={tab}
             onChange={setTab}
             options={[
-              { value: 'calls', label: strings.myCalls },
+              { value: 'calls', label: strings.callsTab },
               { value: 'posts', label: strings.posts },
+              { value: 'stickers', label: strings.stickersTitle },
             ]}
           />
         </View>
       ) : null}
 
-      {user && tab === 'posts' ? (
+      {user && tab === 'stickers' ? (
+        <View style={{ marginTop: space.lg }}>
+          <StickerGrid stickers={stickers} onCreate={() => router.push('/stickers')} />
+        </View>
+      ) : user && tab === 'posts' ? (
         <>
           <PostList authorId={user.id} onNotice={setNotice} />
           {notice ? (

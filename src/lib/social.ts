@@ -1,3 +1,4 @@
+import { mediaUrl } from './posts';
 import { supabase } from './supabase';
 
 export type ProfileCard = {
@@ -12,10 +13,16 @@ export type ProfileCard = {
   callsResolved: number;
   callsHits: number;
   pro: boolean;
+  avatarUrl: string | null;
+  bannerUrl: string | null;
+  bannerColor: string | null;
+  location: string;
+  website: string;
 };
 
-const CARD =
+const BASE_CARD =
   'id, username, handle, bio, created_at, follower_count, following_count, calls_total, calls_resolved, calls_hits, pro';
+const CARD = `${BASE_CARD}, avatar_path, banner_path, banner_color, location, website`;
 
 function toCard(r: any): ProfileCard {
   return {
@@ -30,12 +37,20 @@ function toCard(r: any): ProfileCard {
     callsResolved: r.calls_resolved ?? 0,
     callsHits: r.calls_hits ?? 0,
     pro: !!r.pro,
+    avatarUrl: mediaUrl(r.avatar_path ?? null),
+    bannerUrl: mediaUrl(r.banner_path ?? null),
+    bannerColor: r.banner_color ?? null,
+    location: r.location ?? '',
+    website: r.website ?? '',
   };
 }
 
 export async function fetchCard(id: string): Promise<ProfileCard | null> {
-  const { data } = await supabase.from('profile_cards').select(CARD).eq('id', id).maybeSingle();
-  return data ? toCard(data) : null;
+  const full = await supabase.from('profile_cards').select(CARD).eq('id', id).maybeSingle();
+  if (!full.error) return full.data ? toCard(full.data) : null;
+  // Server without the profile-customisation SQL yet: fall back to the basic card.
+  const base = await supabase.from('profile_cards').select(BASE_CARD).eq('id', id).maybeSingle();
+  return base.data ? toCard(base.data) : null;
 }
 
 /** Finds people by @handle or name. */
@@ -44,7 +59,7 @@ export async function searchProfiles(query: string): Promise<ProfileCard[]> {
   if (q.length < 2) return [];
   const { data } = await supabase
     .from('profile_cards')
-    .select(CARD)
+    .select(BASE_CARD)
     .or(`handle.ilike.${q.toLowerCase().replace(/ /g, '')}%,username.ilike.%${q}%`)
     .order('follower_count', { ascending: false })
     .limit(25);

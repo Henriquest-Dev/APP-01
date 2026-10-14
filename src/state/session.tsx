@@ -148,9 +148,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     deleteAccount: async () => {
       if (!user) return false;
       // Remove the user's uploaded media first (the database cascade can't reach storage).
-      const { data: files } = await supabase.storage.from('media').list(user.id, { limit: 1000 });
-      if (files?.length)
-        await supabase.storage.from('media').remove(files.map((f) => `${user.id}/${f.name}`));
+      for (const folder of [user.id, `${user.id}/stickers`]) {
+        const { data: files } = await supabase.storage.from('media').list(folder, { limit: 1000 });
+        const names = (files ?? []).filter((f) => f.id).map((f) => `${folder}/${f.name}`);
+        if (names.length) await supabase.storage.from('media').remove(names);
+      }
       const { error } = await supabase.rpc('delete_my_account');
       if (error) return false;
       await supabase.auth.signOut({ scope: 'local' }).catch(() => {});

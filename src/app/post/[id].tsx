@@ -17,6 +17,7 @@ import { ActionSheet, type SheetAction } from '@/components/action-sheet';
 import { Background } from '@/components/background';
 import { IconButton } from '@/components/icon-button';
 import { LiveDot } from '@/components/live-dot';
+import { Avatar } from '@/components/avatar';
 import { PostCard } from '@/components/post-card';
 import { PressableScale } from '@/components/pressable-scale';
 import { Txt } from '@/components/text';
@@ -267,11 +268,7 @@ export default function PostDetail() {
             renderItem={({ item }) => (
               <Animated.View entering={FadeInUp.duration(220)}>
                 <PressableScale scaleTo={0.99} onLongPress={() => setSelected(item)} style={styles.comment}>
-                  <View style={styles.avatar}>
-                    <Txt size={12} weight="bold">
-                      {item.username[0]?.toUpperCase() ?? '?'}
-                    </Txt>
-                  </View>
+                  <Avatar userId={item.userId} name={item.username} size={34} />
                   <View style={{ flex: 1, gap: 2 }}>
                     <Txt size={13} weight="semibold">
                       @{item.username}{' '}

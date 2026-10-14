@@ -103,6 +103,9 @@ function RootStack() {
           options={{ presentation: 'modal', animation: 'slide_from_bottom', gestureDirection: 'vertical' }}
         />
         <Stack.Screen name="user/[id]" />
+        <Stack.Screen name="follows/[id]" />
+        <Stack.Screen name="stickers" />
+        <Stack.Screen name="profile/edit" />
         <Stack.Screen
           name="post/new"
           options={{ presentation: 'modal', animation: 'slide_from_bottom', gestureDirection: 'vertical' }}

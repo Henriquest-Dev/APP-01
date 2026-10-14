@@ -9,6 +9,7 @@ import { formatAgo } from '@/lib/format';
 import { recordView, type Post } from '@/lib/posts';
 import { colors, radius, space } from '@/theme';
 import { ActionSheet, type SheetAction } from './action-sheet';
+import { Avatar } from './avatar';
 import { PostActions } from './post-actions';
 import { PostVideo } from './post-video';
 import { PressableScale } from './pressable-scale';
@@ -84,10 +85,8 @@ export function PostCard({
       ) : null}
 
       <View style={styles.head}>
-        <PressableScale scaleTo={0.92} onPress={openAuthor} style={styles.avatar}>
-          <Txt size={13} weight="bold">
-            {post.username[0]?.toUpperCase() ?? '?'}
-          </Txt>
+        <PressableScale scaleTo={0.92} onPress={openAuthor}>
+          <Avatar userId={post.userId} name={post.username} size={40} />
         </PressableScale>
         <PressableScale scaleTo={0.98} onPress={openAuthor} style={{ flex: 1 }}>
           <Txt size={14} weight="semibold" numberOfLines={1}>

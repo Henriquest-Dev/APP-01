@@ -1,3 +1,4 @@
+import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import {
   Ban,
@@ -9,6 +10,7 @@ import {
   Megaphone,
   SendHorizontal,
   Share2,
+  Sticker as StickerIcon,
   X,
 } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
@@ -30,6 +32,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ActionSheet } from '@/components/action-sheet';
 import { Background } from '@/components/background';
 import { FeedCallCard } from '@/components/feed-call-card';
+import { StickerGrid } from '@/components/sticker-grid';
+import { fetchStickers, type Sticker } from '@/lib/profile';
 import { GroupBanner } from '@/components/group-banner';
 import { IconButton } from '@/components/icon-button';
 import { LiveDot } from '@/components/live-dot';
@@ -67,6 +71,8 @@ export default function GroupChat() {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [picker, setPicker] = useState(false);
+  const [tray, setTray] = useState(false);
+  const [myStickers, setMyStickers] = useState<Sticker[]>([]);
 
   useEffect(() => {
     let alive = true;
@@ -80,17 +86,17 @@ export default function GroupChat() {
   const canRead = !!group && (group.isPublic || member);
   const { isBlocked, block } = useBlocks();
   const [selected, setSelected] = useState<Message | null>(null);
-  const { messages: rawMessages, calls } = useMessages(id, canRead);
+  const { messages: rawMessages, calls, stickers } = useMessages(id, canRead);
   const messages = rawMessages?.filter((m) => !isBlocked(m.userId)) ?? null;
 
-  const send = async (callId?: string) => {
+  const send = async (callId?: string, stickerId?: string) => {
     const body = text.trim();
-    if ((!body && !callId) || sending) return;
+    if ((!body && !callId && !stickerId) || sending) return;
     setSending(true);
     setError(null);
     try {
-      await sendMessage(id, callId ? '' : body, callId);
-      if (!callId) setText('');
+      await sendMessage(id, callId || stickerId ? '' : body, callId, stickerId);
+      if (!callId && !stickerId) setText('');
     } catch (e) {
       setError(
         String((e as Error).message).includes('slow down') ? strings.tooManyMessages : strings.callFailed,
@@ -214,6 +220,7 @@ export default function GroupChat() {
                 mine={item.userId === user?.id}
                 showName={(messages ?? [])[index + 1]?.userId !== item.userId}
                 call={item.callId ? calls[item.callId] : undefined}
+                sticker={item.stickerId ? stickers[item.stickerId] : undefined}
                 livePrice={
                   item.callId ? coins.find((c) => c.id === calls[item.callId!]?.coinId)?.price : undefined
                 }
@@ -234,6 +241,15 @@ export default function GroupChat() {
                 icon={Megaphone}
                 label={strings.shareCall}
                 onPress={() => setPicker(true)}
+                size={44}
+              />
+              <IconButton
+                icon={StickerIcon}
+                label={strings.stickersTitle}
+                onPress={() => {
+                  setTray(true);
+                  if (user) fetchStickers(user.id).then(setMyStickers);
+                }}
                 size={44}
               />
               <TextInput
@@ -296,6 +312,29 @@ export default function GroupChat() {
           }
         />
 
+        <Modal visible={tray} transparent animationType="slide" onRequestClose={() => setTray(false)}>
+          <Pressable style={styles.backdrop} onPress={() => setTray(false)} />
+          <View style={[styles.sheet, { paddingBottom: insets.bottom + space.lg }]}>
+            <View style={styles.sheetHead}>
+              <Txt size={17} weight="semibold">
+                {strings.stickersTitle}
+              </Txt>
+              <IconButton icon={X} label="Close" onPress={() => setTray(false)} size={36} />
+            </View>
+            <StickerGrid
+              stickers={myStickers}
+              onCreate={() => {
+                setTray(false);
+                router.push('/stickers');
+              }}
+              onPress={(s) => {
+                setTray(false);
+                send(undefined, s.id);
+              }}
+            />
+          </View>
+        </Modal>
+
         <Modal visible={picker} transparent animationType="slide" onRequestClose={() => setPicker(false)}>
           <Pressable style={styles.backdrop} onPress={() => setPicker(false)} />
           <View style={[styles.sheet, { paddingBottom: insets.bottom + space.lg }]}>
@@ -345,6 +384,7 @@ function Bubble({
   mine,
   showName,
   call,
+  sticker,
   livePrice,
 }: {
   onLongPress?: () => void;
@@ -352,6 +392,7 @@ function Bubble({
   mine: boolean;
   showName: boolean;
   call?: import('@/lib/community').FeedCall;
+  sticker?: Sticker;
   livePrice?: number;
 }) {
   const ago = formatAgo(message.createdAt) || strings.justNow;
@@ -372,7 +413,13 @@ function Bubble({
             @{message.username}
           </Txt>
         ) : null}
-        {message.callId ? (
+        {message.stickerId ? (
+          sticker ? (
+            <Image source={{ uri: sticker.url }} style={styles.stickerImg} contentFit="contain" />
+          ) : (
+            <View style={styles.stickerImg} />
+          )
+        ) : message.callId ? (
           <View style={{ width: 300, maxWidth: '100%' }}>
             {call ? (
               <FeedCallCard call={call} livePrice={livePrice} compact isMine={mine} />
@@ -396,6 +443,7 @@ function Bubble({
 }
 
 const styles = StyleSheet.create({
+  stickerImg: { width: 150, height: 150 },
   bannerWrap: {
     marginHorizontal: space.lg,
     marginBottom: space.sm,

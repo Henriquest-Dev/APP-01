@@ -3,6 +3,7 @@ import { ChevronLeft, Search } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, TextInput, View } from 'react-native';
 
+import { Avatar } from '@/components/avatar';
 import { Badges } from '@/components/badges';
 import { Glass } from '@/components/glass';
 import { IconButton } from '@/components/icon-button';
@@ -74,11 +75,7 @@ export default function SearchPeople() {
               scaleTo={0.98}
               onPress={() => router.push({ pathname: '/user/[id]', params: { id: p.id } })}
               style={[styles.row, i > 0 && styles.divider]}>
-              <View style={styles.avatar}>
-                <Txt size={16} weight="bold" color={colors.accentInk}>
-                  {p.username[0]?.toUpperCase() ?? '?'}
-                </Txt>
-              </View>
+              <Avatar userId={p.id} name={p.username} size={44} />
               <View style={{ flex: 1, gap: 4 }}>
                 <Txt size={15} weight="semibold" numberOfLines={1}>
                   {p.username}
