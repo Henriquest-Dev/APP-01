@@ -189,7 +189,7 @@ export default function CoinScreen() {
       )}
 
       <Animated.View entering={FadeInDown.delay(180).duration(motion.base)}>
-        <AiAnalysis coin={coin} series={series} />
+        <AiAnalysis coin={coin} series={series} rangeDays={chart && chart.length > 1 ? Number(range) : 7} />
       </Animated.View>
 
       {coinCalls && coinCalls.length > 0 ? (
