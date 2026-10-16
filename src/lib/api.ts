@@ -39,7 +39,7 @@ export async function fetchCoin(id: string): Promise<Coin | undefined> {
 function toCoin(r: any): Coin {
   return {
     id: r.id,
-    symbol: String(r.symbol).toUpperCase(),
+    symbol: String(r.symbol || r.id.slice(0, 12)).toUpperCase(),
     name: r.name,
     image: r.image,
     price: r.current_price ?? 0,
@@ -99,7 +99,7 @@ export async function searchCoins(query: string): Promise<CoinHit[]> {
   const data = await get<{ coins: any[] }>(`/search?query=${encodeURIComponent(q)}`);
   return (data.coins ?? []).slice(0, 20).map((c) => ({
     id: c.id,
-    symbol: String(c.symbol ?? '').toUpperCase(),
+    symbol: String(c.symbol || c.id.slice(0, 12)).toUpperCase(),
     name: c.name,
     image: c.large ?? c.thumb ?? '',
     rank: c.market_cap_rank ?? null,

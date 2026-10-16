@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 
+import { callCoinFields } from '@/lib/call-input';
 import { supabase } from '@/lib/supabase';
 import type { Call, CallStatus, Direction, Timeframe } from '@/lib/types';
 import { useSession } from './session';
@@ -130,10 +131,7 @@ export function CallsProvider({ children }: { children: ReactNode }) {
     const { data, error } = await supabase
       .from('calls')
       .insert({
-        coin_id: call.coinId,
-        symbol: call.symbol,
-        name: call.name,
-        image: call.image || null,
+        ...callCoinFields({ id: call.coinId, symbol: call.symbol, name: call.name, image: call.image }),
         direction: call.direction,
         entry_price: call.entryPrice,
         target_price: call.targetPrice ?? null,
