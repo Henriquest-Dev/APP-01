@@ -328,4 +328,6 @@ export const zh: Strings = {
   noCoinsFound: '未找到币种。',
   hasCalls: '有社区预测',
   searchOtherCoin: '搜索其他任意币种',
+  momentumLiveHint: '随每个新价格实时更新',
+  momentumRecent: '最近几小时',
 };

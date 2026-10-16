@@ -331,4 +331,6 @@ export const es: Strings = {
   noCoinsFound: 'No se encontró ninguna moneda.',
   hasCalls: 'Tiene calls de la comunidad',
   searchOtherCoin: 'Buscar cualquier otra moneda',
+  momentumLiveHint: 'se actualiza en vivo con cada nuevo precio',
+  momentumRecent: 'últimas horas',
 };

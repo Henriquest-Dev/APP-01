@@ -331,4 +331,6 @@ export const tr: Strings = {
   noCoinsFound: 'Coin bulunamadı.',
   hasCalls: 'Topluluk call’ları var',
   searchOtherCoin: 'Başka bir coin ara',
+  momentumLiveHint: 'her yeni fiyatla canlı güncellenir',
+  momentumRecent: 'son saatler',
 };

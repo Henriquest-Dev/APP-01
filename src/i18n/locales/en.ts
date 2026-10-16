@@ -329,6 +329,8 @@ export const en = {
   noCoinsFound: 'No coin found.',
   hasCalls: 'Has community calls',
   searchOtherCoin: 'Search any other coin',
+  momentumLiveHint: 'updates live with every new price',
+  momentumRecent: 'last hours',
 };
 
 export type Strings = typeof en;

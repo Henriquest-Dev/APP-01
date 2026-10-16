@@ -330,4 +330,6 @@ export const hi: Strings = {
   noCoinsFound: 'कोई कॉइन नहीं मिला।',
   hasCalls: 'कम्युनिटी कॉल हैं',
   searchOtherCoin: 'कोई और कॉइन खोजें',
+  momentumLiveHint: 'हर नई कीमत के साथ लाइव अपडेट',
+  momentumRecent: 'पिछले कुछ घंटे',
 };

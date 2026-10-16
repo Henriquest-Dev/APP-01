@@ -334,4 +334,6 @@ export const fr: Strings = {
   noCoinsFound: 'Aucune crypto trouvée.',
   hasCalls: 'A des calls de la communauté',
   searchOtherCoin: 'Chercher une autre crypto',
+  momentumLiveHint: 'se met à jour en direct à chaque nouveau prix',
+  momentumRecent: 'dernières heures',
 };

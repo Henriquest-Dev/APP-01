@@ -332,4 +332,6 @@ export const de: Strings = {
   noCoinsFound: 'Keine Münze gefunden.',
   hasCalls: 'Hat Community-Calls',
   searchOtherCoin: 'Beliebige andere Münze suchen',
+  momentumLiveHint: 'aktualisiert sich live mit jedem neuen Preis',
+  momentumRecent: 'letzte Stunden',
 };

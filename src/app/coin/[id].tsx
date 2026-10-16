@@ -4,7 +4,6 @@ import {
   Bookmark,
   ChevronLeft,
   CircleDollarSign,
-  Gauge,
   MoveHorizontal,
   TrendingDown,
   TrendingUp,
@@ -23,7 +22,7 @@ import { ConsensusBar } from '@/components/consensus-bar';
 import { Glass } from '@/components/glass';
 import { IconButton } from '@/components/icon-button';
 import { AiAnalysis } from '@/components/ai-analysis';
-import { MomentumMeter, momentumColor } from '@/components/momentum-meter';
+import { MomentumLive } from '@/components/momentum-live';
 import { PressableScale } from '@/components/pressable-scale';
 import { Price } from '@/components/price';
 import { Screen } from '@/components/screen';
@@ -32,11 +31,12 @@ import { Txt } from '@/components/text';
 import { strings } from '@/i18n';
 import { fetchChart, fetchCoin, type ChartRange } from '@/lib/api';
 import { formatCompact, formatPrice } from '@/lib/format';
-import { isStablecoin, momentumScore } from '@/lib/momentum';
+import { isStablecoin } from '@/lib/momentum';
 import type { Coin } from '@/lib/types';
 import { FeedCallCard } from '@/components/feed-call-card';
 import { LiveDot } from '@/components/live-dot';
 import { useCallFeed } from '@/hooks/use-call-feed';
+import { useLivePrice } from '@/hooks/use-live-price';
 import { useConsensus } from '@/hooks/use-consensus';
 import { useCoin } from '@/state/market';
 import { colors, motion, radius, space } from '@/theme';
@@ -49,6 +49,7 @@ export default function CoinScreen() {
   const { calls: coinCalls, freshIds } = useCallFeed({ coinId: id, limit: 6 });
   const [fetched, setFetched] = useState<Coin>();
   const coin = cached ?? fetched;
+  const live = useLivePrice(coin);
 
   const [range, setRange] = useState<ChartRange>('1');
   const [loaded, setLoaded] = useState<{ key: string; data: number[] }>();
@@ -97,7 +98,10 @@ export default function CoinScreen() {
 
   const series = chart && chart.length > 1 ? chart : coin.sparkline;
   const rising = series.length > 1 ? series[series.length - 1] >= series[0] : coin.change24h >= 0;
-  const score = momentumScore(coin);
+  const liveChange =
+    live.price !== null && coin.price > 0 && coin.change24h > -99
+      ? (live.price / (coin.price / (1 + coin.change24h / 100)) - 1) * 100
+      : coin.change24h;
   const dayRange =
     coin.high24h > coin.low24h ? (coin.price - coin.low24h) / (coin.high24h - coin.low24h) : 0.5;
 
@@ -118,8 +122,8 @@ export default function CoinScreen() {
         <Txt size={13} color={colors.textMuted}>
           {coin.symbol} · {strings.price}
         </Txt>
-        <Price value={coin.price} size={40} />
-        <ChangePill value={coin.change24h} plain />
+        <Price value={live.price ?? coin.price} size={40} />
+        <ChangePill value={liveChange} plain />
       </Animated.View>
 
       <View style={styles.chart}>
@@ -170,20 +174,7 @@ export default function CoinScreen() {
       {isStablecoin(coin) ? null : (
         <Animated.View entering={FadeInDown.delay(160).duration(motion.base)}>
           <Glass style={styles.card}>
-            <View style={styles.cardHead}>
-              <CardTitle icon={Gauge} title={strings.momentum} />
-              <Txt size={22} weight="semibold" color={momentumColor(score)} numeric>
-                {score}
-                <Txt size={13} color={colors.textFaint}>
-                  {' '}
-                  / 100
-                </Txt>
-              </Txt>
-            </View>
-            <MomentumMeter score={score} />
-            <Txt size={12} color={colors.textMuted}>
-              {strings.momentumHint}
-            </Txt>
+            <MomentumLive coin={coin} live={live} />
           </Glass>
         </Animated.View>
       )}

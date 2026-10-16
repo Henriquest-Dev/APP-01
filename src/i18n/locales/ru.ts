@@ -331,4 +331,6 @@ export const ru: Strings = {
   noCoinsFound: 'Монета не найдена.',
   hasCalls: 'Есть коллы сообщества',
   searchOtherCoin: 'Найти другую монету',
+  momentumLiveHint: 'обновляется вживую с каждой новой ценой',
+  momentumRecent: 'последние часы',
 };

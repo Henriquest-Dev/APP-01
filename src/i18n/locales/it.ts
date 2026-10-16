@@ -330,4 +330,6 @@ export const it: Strings = {
   noCoinsFound: 'Nessuna moneta trovata.',
   hasCalls: 'Ha call della community',
   searchOtherCoin: 'Cerca un’altra moneta',
+  momentumLiveHint: 'si aggiorna in tempo reale a ogni nuovo prezzo',
+  momentumRecent: 'ultime ore',
 };
