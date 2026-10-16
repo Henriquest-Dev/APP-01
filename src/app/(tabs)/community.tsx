@@ -20,6 +20,7 @@ import { useLives } from '@/hooks/use-lives';
 import { strings } from '@/i18n';
 import { fetchGroups, joinGroup, joinGroupByCode, type Group } from '@/lib/community';
 import { formatAgo } from '@/lib/format';
+import { useCoinPrices } from '@/hooks/use-coin-prices';
 import { useBlocks } from '@/state/blocks';
 import { useMarket } from '@/state/market';
 import { useSession } from '@/state/session';
@@ -93,7 +94,8 @@ function Feed() {
     enabled: scope === 'all' || !!user,
   });
   const calls = rawCalls?.filter((c) => !isBlocked(c.userId)) ?? null;
-  const priceOf = (coinId: string) => coins.find((c) => c.id === coinId)?.price;
+  const livePrices = useCoinPrices((rawCalls ?? []).map((c) => c.coinId));
+  const priceOf = (coinId: string) => livePrices[coinId] ?? coins.find((c) => c.id === coinId)?.price;
 
   return (
     <View>

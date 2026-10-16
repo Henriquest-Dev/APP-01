@@ -321,4 +321,5 @@ export const zh: Strings = {
   noStickers: '还没有贴纸。',
   profileSaved: '资料已保存',
   imageFailed: '图片上传失败，请重试。',
+  coinUnavailable: '暂时无法加载该币种的价格，请稍后再试。',
 };

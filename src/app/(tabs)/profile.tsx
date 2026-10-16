@@ -21,6 +21,7 @@ import { fetchCard, type ProfileCard } from '@/lib/social';
 import { formatPercent, formatPrice, formatTimeLeft } from '@/lib/format';
 import { fetchServerPrices } from '@/lib/server-prices';
 import { callStats } from '@/lib/stats';
+import { useCoinPrices } from '@/hooks/use-coin-prices';
 import { useCalls } from '@/state/calls';
 import { useMarket } from '@/state/market';
 import { usePro } from '@/state/pro';
@@ -58,7 +59,6 @@ function fallbackCard(id: string, name: string): ProfileCard {
 
 export default function Profile() {
   const { calls } = useCalls();
-  const { coins } = useMarket();
   const { user, signOut } = useSession();
   const { pro } = usePro();
   const stats = callStats(calls);
@@ -82,6 +82,7 @@ export default function Profile() {
       };
     }, [userId]),
   );
+  const coinPrices = useCoinPrices(calls.filter((c) => c.status === 'open').map((c) => c.coinId));
   const serverPrices = useServerPrices(calls.filter((c) => c.status === 'open').map((c) => c.symbol));
 
   return (
@@ -189,9 +190,7 @@ export default function Profile() {
             calls.map((call, i) => {
               const open = call.status === 'open';
               const now = open
-                ? (serverPrices[call.symbol] ??
-                  coins.find((c) => c.id === call.coinId)?.price ??
-                  call.entryPrice)
+                ? (coinPrices[call.coinId] ?? serverPrices[call.symbol] ?? call.entryPrice)
                 : (call.exitPrice ?? call.entryPrice);
               const move = ((now - call.entryPrice) / call.entryPrice) * 100;
               const up = call.direction === 'up';

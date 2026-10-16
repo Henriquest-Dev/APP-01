@@ -322,6 +322,7 @@ export const en = {
   noStickers: 'No stickers yet.',
   profileSaved: 'Profile saved',
   imageFailed: 'Could not upload the image. Try again.',
+  coinUnavailable: 'Could not load this coin’s price right now. Try again in a moment.',
 };
 
 export type Strings = typeof en;

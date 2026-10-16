@@ -12,12 +12,12 @@ import { StickerGrid } from '@/components/sticker-grid';
 import { Txt } from '@/components/text';
 import { UnderlineTabs } from '@/components/underline-tabs';
 import { useCallFeed } from '@/hooks/use-call-feed';
+import { useCoinPrices } from '@/hooks/use-coin-prices';
 import { strings } from '@/i18n';
 import { haptic } from '@/lib/haptics';
 import { fetchLabels, fetchStickers, type Label, type Sticker } from '@/lib/profile';
 import { fetchCard, isFollowing, setFollow, type ProfileCard } from '@/lib/social';
 import { useBlocks } from '@/state/blocks';
-import { useMarket } from '@/state/market';
 import { useSession } from '@/state/session';
 import { colors, space } from '@/theme';
 import { ChevronLeft } from 'lucide-react-native';
@@ -28,7 +28,6 @@ export default function UserProfile() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
   const { user } = useSession();
-  const { coins } = useMarket();
   const { isBlocked } = useBlocks();
   const [card, setCard] = useState<ProfileCard | null | undefined>(undefined);
   const [labels, setLabels] = useState<Label[]>([]);
@@ -39,6 +38,7 @@ export default function UserProfile() {
   const [notice, setNotice] = useState<string | null>(null);
   const mine = user?.id === id;
   const { calls } = useCallFeed({ userId: id, limit: 40 });
+  const livePrices = useCoinPrices((calls ?? []).map((c) => c.coinId));
 
   useEffect(() => {
     let alive = true;
@@ -129,12 +129,7 @@ export default function UserProfile() {
         ) : (
           <View style={styles.list}>
             {calls.map((c) => (
-              <FeedCallCard
-                key={c.id}
-                call={c}
-                livePrice={coins.find((x) => x.id === c.coinId)?.price}
-                isMine={mine}
-              />
+              <FeedCallCard key={c.id} call={c} livePrice={livePrices[c.coinId]} isMine={mine} />
             ))}
           </View>
         )

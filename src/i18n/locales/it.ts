@@ -323,4 +323,5 @@ export const it: Strings = {
   noStickers: 'Ancora nessuno sticker.',
   profileSaved: 'Profilo salvato',
   imageFailed: 'Impossibile caricare l’immagine. Riprova.',
+  coinUnavailable: 'Impossibile caricare il prezzo di questa moneta ora. Riprova tra poco.',
 };

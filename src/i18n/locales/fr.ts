@@ -327,4 +327,5 @@ export const fr: Strings = {
   noStickers: 'Pas encore de stickers.',
   profileSaved: 'Profil enregistré',
   imageFailed: 'Impossible d’envoyer l’image. Réessaie.',
+  coinUnavailable: 'Impossible de charger le prix de cette crypto pour le moment. Réessaie dans un instant.',
 };

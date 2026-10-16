@@ -323,4 +323,5 @@ export const hi: Strings = {
   noStickers: 'अभी कोई स्टिकर नहीं।',
   profileSaved: 'प्रोफ़ाइल सहेजी गई',
   imageFailed: 'तस्वीर अपलोड नहीं हो सकी। फिर कोशिश करें।',
+  coinUnavailable: 'इस कॉइन की कीमत अभी लोड नहीं हो सकी। थोड़ी देर बाद फिर कोशिश करें।',
 };

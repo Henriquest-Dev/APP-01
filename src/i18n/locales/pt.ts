@@ -325,4 +325,5 @@ export const pt: Strings = {
   noStickers: 'Ainda sem stickers.',
   profileSaved: 'Perfil guardado',
   imageFailed: 'Não foi possível enviar a imagem. Tenta outra vez.',
+  coinUnavailable: 'Não foi possível carregar o preço desta moeda agora. Tenta daqui a pouco.',
 };

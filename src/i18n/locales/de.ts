@@ -325,4 +325,5 @@ export const de: Strings = {
   noStickers: 'Noch keine Sticker.',
   profileSaved: 'Profil gespeichert',
   imageFailed: 'Bild konnte nicht hochgeladen werden. Versuch es erneut.',
+  coinUnavailable: 'Der Preis dieser Münze konnte gerade nicht geladen werden. Versuch es gleich noch einmal.',
 };

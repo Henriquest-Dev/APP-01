@@ -1,7 +1,7 @@
 import { haptic } from '@/lib/haptics';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Check, TrendingDown, TrendingUp, X } from 'lucide-react-native';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -22,9 +22,10 @@ import { Screen } from '@/components/screen';
 import { Segmented } from '@/components/segmented';
 import { Txt } from '@/components/text';
 import { strings } from '@/i18n';
+import { lookupCoin } from '@/lib/coin-lookup';
 import { formatPercent, formatPrice } from '@/lib/format';
 import { isStablecoin } from '@/lib/momentum';
-import type { Direction, Timeframe } from '@/lib/types';
+import type { Coin, Direction, Timeframe } from '@/lib/types';
 import { useCalls, type CallError } from '@/state/calls';
 import { useSession } from '@/state/session';
 import { useMarket } from '@/state/market';
@@ -46,7 +47,20 @@ export default function NewCall() {
   const [timeframe, setTimeframe] = useState<Timeframe>('7d');
   const [note, setNote] = useState('');
 
-  const coin = coins.find((c) => c.id === coinId);
+  // Coins that are not in the main list (new or trending ones) are looked up by id.
+  const listed = coins.find((c) => c.id === coinId);
+  const [looked, setLooked] = useState<{ id: string; coin?: Coin; failed?: boolean }>();
+  useEffect(() => {
+    if (!coinId || listed) return;
+    let alive = true;
+    lookupCoin(coinId).then((c) => alive && setLooked({ id: coinId, coin: c, failed: !c }));
+    return () => {
+      alive = false;
+    };
+  }, [coinId, listed]);
+  const fetched = looked?.id === coinId ? looked : undefined;
+  const coin = listed ?? fetched?.coin;
+  const loadingCoin = !coin && !!coinId && !fetched;
   const targetValue = Number(target.replace(',', '.'));
   const hasTarget = target.trim() !== '' && targetValue > 0;
   const targetMismatch =
@@ -174,6 +188,12 @@ export default function NewCall() {
               {formatPrice(coin.price)}
             </Txt>
           </Glass>
+        ) : loadingCoin ? (
+          <ActivityIndicator color={colors.accent} style={{ marginTop: space.lg }} />
+        ) : fetched?.failed ? (
+          <Txt size={13} color={colors.down} style={{ paddingHorizontal: space.lg, marginTop: space.md }}>
+            {strings.coinUnavailable}
+          </Txt>
         ) : null}
 
         <Label text={strings.direction} />
@@ -237,7 +257,6 @@ export default function NewCall() {
             {note.length}/280
           </Txt>
         </View>
-
       </Screen>
     </KeyboardAvoidingView>
   );

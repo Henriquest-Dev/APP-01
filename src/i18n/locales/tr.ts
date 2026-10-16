@@ -324,4 +324,5 @@ export const tr: Strings = {
   noStickers: 'Henüz çıkartma yok.',
   profileSaved: 'Profil kaydedildi',
   imageFailed: 'Görsel yüklenemedi. Tekrar dene.',
+  coinUnavailable: 'Bu coinin fiyatı şu an yüklenemedi. Biraz sonra tekrar dene.',
 };
