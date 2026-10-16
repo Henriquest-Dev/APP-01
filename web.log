@@ -5,58 +5,66 @@ Starting project at /home/user/APP-01
 📦 [expo-iap] Using OpenIAP from CocoaPods
 Using src/app as the root directory for Expo Router.
 React Compiler enabled
+ ERROR  An unknown error occurred while installing React Native DevTools. Details:
+
+[1016/205904.652554:FATAL:electron/shell/app/electron_main_delegate.cc:313] Running as root without --no-sandbox is not supported. See https://crbug.com/638180.
+
 Metro is running in CI mode, reloads are disabled. Remove CI=true to enable watch mode.
 Starting Metro Bundler
 
 warning: Bundler cache is empty, rebuilding (this may take a minute)
- ERROR  An unknown error occurred while installing React Native DevTools. Details:
-
-[1016/201733.078380:FATAL:electron/shell/app/electron_main_delegate.cc:313] Running as root without --no-sandbox is not supported. See https://crbug.com/638180.
-
 Waiting on http://localhost:8081
 
-An update for expo is available: 57.0.28 → ~57.0.30
-5 other packages may need updating. Run npx expo install --check for details.
 Logs for your project will appear below.
 | 🔍 [expo-iap] Config values: horizonAppId=undefined, pinnedStore=auto, amazonAppstoreKey=none, vega=auto, onside=false
 | 📦 [expo-iap] Using OpenIAP from CocoaPods
-Web Bundled 47138ms node_modules/expo-router/entry.js (3640 modules)
-λ Bundled 47611ms node_modules/expo/node_modules/@expo/cli/node_modules/@expo/router-server/node/render.js (3614 modules)
+λ Bundled 41835ms node_modules/expo/node_modules/@expo/cli/node_modules/@expo/router-server/node/render.js (3615 modules)
 [expo-notifications] Listening to push token changes is not yet fully supported on web. Adding a listener will have no effect.
-λ Bundled 151ms node_modules/expo/node_modules/@expo/cli/node_modules/@expo/router-server/node/render.js (1 module)
+Web Bundled 44161ms node_modules/expo-router/entry.js (3642 modules)
+λ Bundled 127ms node_modules/expo/node_modules/@expo/cli/node_modules/@expo/router-server/node/render.js (1 module)
 [expo-notifications] Listening to push token changes is not yet fully supported on web. Adding a listener will have no effect.
-Web Bundled 1561ms node_modules/expo-router/entry.js (1 module)
-Web Bundled 22045ms node_modules/expo-router/entry.js (3641 modules)
+Web Bundled 1620ms node_modules/expo-router/entry.js (1 module)
+Web Bundled 19446ms node_modules/expo-router/entry.js (3642 modules)
 Web  INFO  %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
 Web  LOG  Running application "main" with appParams:
  {"hydrate": undefined, "rootTag": "#root"} 
 Development-level warnings: ON.
 Performance optimizations: OFF.
 Web  WARN  [expo-notifications] Listening to push token changes is not yet fully supported on web. Adding a listener will have no effect.
-λ Bundled 107ms node_modules/expo/node_modules/@expo/cli/node_modules/@expo/router-server/node/render.js (1 module)
+λ Bundled 126ms node_modules/expo/node_modules/@expo/cli/node_modules/@expo/router-server/node/render.js (1 module)
 [expo-notifications] Listening to push token changes is not yet fully supported on web. Adding a listener will have no effect.
-Web Bundled 1410ms node_modules/expo-router/entry.js (1 module)
-Web Bundled 291ms node_modules/expo-router/entry.js (1 module)
+Web Bundled 1480ms node_modules/expo-router/entry.js (1 module)
+Web Bundled 296ms node_modules/expo-router/entry.js (1 module)
 Web  INFO  %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
 Web  LOG  Running application "main" with appParams:
  {"hydrate": undefined, "rootTag": "#root"} 
 Development-level warnings: ON.
 Performance optimizations: OFF.
 Web  WARN  [expo-notifications] Listening to push token changes is not yet fully supported on web. Adding a listener will have no effect.
-λ Bundled 116ms node_modules/expo/node_modules/@expo/cli/node_modules/@expo/router-server/node/render.js (1 module)
+λ Bundled 158ms node_modules/expo/node_modules/@expo/cli/node_modules/@expo/router-server/node/render.js (1 module)
 [expo-notifications] Listening to push token changes is not yet fully supported on web. Adding a listener will have no effect.
-Web Bundled 697ms node_modules/expo-router/entry.js (1 module)
-Web Bundled 118ms node_modules/expo-router/entry.js (1 module)
+Web Bundled 882ms node_modules/expo-router/entry.js (1 module)
+Web Bundled 149ms node_modules/expo-router/entry.js (1 module)
 Web  INFO  %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
 Web  LOG  Running application "main" with appParams:
  {"hydrate": undefined, "rootTag": "#root"} 
 Development-level warnings: ON.
 Performance optimizations: OFF.
 Web  WARN  [expo-notifications] Listening to push token changes is not yet fully supported on web. Adding a listener will have no effect.
-λ Bundled 162ms node_modules/expo/node_modules/@expo/cli/node_modules/@expo/router-server/node/render.js (1 module)
+λ Bundled 130ms node_modules/expo/node_modules/@expo/cli/node_modules/@expo/router-server/node/render.js (1 module)
 [expo-notifications] Listening to push token changes is not yet fully supported on web. Adding a listener will have no effect.
-Web Bundled 801ms node_modules/expo-router/entry.js (1 module)
-Web Bundled 99ms node_modules/expo-router/entry.js (1 module)
+Web Bundled 814ms node_modules/expo-router/entry.js (1 module)
+Web Bundled 106ms node_modules/expo-router/entry.js (1 module)
+Web  INFO  %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+Web  LOG  Running application "main" with appParams:
+ {"hydrate": undefined, "rootTag": "#root"} 
+Development-level warnings: ON.
+Performance optimizations: OFF.
+Web  WARN  [expo-notifications] Listening to push token changes is not yet fully supported on web. Adding a listener will have no effect.
+λ Bundled 85ms node_modules/expo/node_modules/@expo/cli/node_modules/@expo/router-server/node/render.js (1 module)
+[expo-notifications] Listening to push token changes is not yet fully supported on web. Adding a listener will have no effect.
+Web Bundled 685ms node_modules/expo-router/entry.js (1 module)
+Web Bundled 105ms node_modules/expo-router/entry.js (1 module)
 Web  INFO  %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
 Web  LOG  Running application "main" with appParams:
  {"hydrate": undefined, "rootTag": "#root"} 

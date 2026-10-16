@@ -45,3 +45,22 @@ export async function fetchCoinPrices(ids: string[]): Promise<Record<string, num
   const { data } = await supabase.from('coin_prices').select('coin_id, price').in('coin_id', unique);
   return Object.fromEntries((data ?? []).map((r) => [r.coin_id as string, Number(r.price)]));
 }
+
+export type Quote = { price: number; change24h?: number };
+
+/** Price + 24h change from the Callout server (no call to the public market API). */
+export async function fetchCoinQuotes(ids: string[]): Promise<Record<string, Quote>> {
+  const unique = [...new Set(ids)].filter(Boolean).slice(0, 300);
+  if (!unique.length) return {};
+  const { data, error } = await supabase
+    .from('coin_prices')
+    .select('coin_id, price, change_24h')
+    .in('coin_id', unique);
+  if (error) return {};
+  return Object.fromEntries(
+    (data ?? []).map((r) => [
+      r.coin_id as string,
+      { price: Number(r.price), change24h: r.change_24h == null ? undefined : Number(r.change_24h) },
+    ]),
+  );
+}

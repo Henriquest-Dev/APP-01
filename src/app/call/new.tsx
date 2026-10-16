@@ -1,6 +1,6 @@
 import { haptic } from '@/lib/haptics';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Check, TrendingDown, TrendingUp, X } from 'lucide-react-native';
+import { Check, Search, TrendingDown, TrendingUp, X } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -21,6 +21,7 @@ import { PressableScale } from '@/components/pressable-scale';
 import { Screen } from '@/components/screen';
 import { Segmented } from '@/components/segmented';
 import { Txt } from '@/components/text';
+import { useCoinSearch } from '@/hooks/use-coin-search';
 import { strings } from '@/i18n';
 import { lookupCoin } from '@/lib/coin-lookup';
 import { formatPercent, formatPrice } from '@/lib/format';
@@ -41,6 +42,8 @@ export default function NewCall() {
   const [error, setError] = useState<string | null>(null);
 
   const [picked, setPicked] = useState(params.coin);
+  const [query, setQuery] = useState('');
+  const search = useCoinSearch(query);
   const coinId = picked ?? coins[0]?.id;
   const [direction, setDirection] = useState<Direction>(params.direction ?? 'up');
   const [target, setTarget] = useState('');
@@ -178,6 +181,51 @@ export default function NewCall() {
             </Animated.View>
           )}
         />
+
+        <View style={styles.searchBox}>
+          <Search size={17} color={colors.textMuted} strokeWidth={1.9} />
+          <TextInput
+            value={query}
+            onChangeText={setQuery}
+            placeholder={strings.searchOtherCoin}
+            placeholderTextColor={colors.textFaint}
+            autoCapitalize="none"
+            autoCorrect={false}
+            selectionColor={colors.accent}
+            style={styles.searchInput}
+          />
+        </View>
+        {query.trim().length >= 2 ? (
+          <View style={styles.results}>
+            {search.loading ? (
+              <ActivityIndicator color={colors.accent} style={{ margin: space.md }} />
+            ) : search.hits.length === 0 ? (
+              <Txt size={13} color={colors.textMuted} style={{ padding: space.md }}>
+                {search.failed ? strings.coinUnavailable : strings.noCoinsFound}
+              </Txt>
+            ) : (
+              search.hits.slice(0, 6).map((h) => (
+                <PressableScale
+                  key={h.id}
+                  accessibilityRole="button"
+                  scaleTo={0.98}
+                  onPress={() => {
+                    setPicked(h.id);
+                    setQuery('');
+                  }}
+                  style={styles.hit}>
+                  <CoinAvatar uri={h.image} symbol={h.symbol} size={30} />
+                  <Txt size={14} weight="semibold" style={{ flex: 1 }} numberOfLines={1}>
+                    {h.name}
+                  </Txt>
+                  <Txt size={12} color={colors.textMuted}>
+                    {h.symbol}
+                  </Txt>
+                </PressableScale>
+              ))
+            )}
+          </View>
+        ) : null}
 
         {coin ? (
           <Glass style={styles.current}>
@@ -329,6 +377,30 @@ function DirectionCard({ up, active, onPress }: { up: boolean; active: boolean; 
 }
 
 const styles = StyleSheet.create({
+  searchBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.sm,
+    marginHorizontal: space.lg,
+    marginTop: space.md,
+    paddingHorizontal: space.md,
+    height: 46,
+    borderRadius: radius.pill,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  searchInput: { flex: 1, color: colors.text, fontFamily: fonts.regular, fontSize: 14 },
+  results: {
+    marginHorizontal: space.lg,
+    marginTop: space.sm,
+    borderRadius: radius.md,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    overflow: 'hidden',
+  },
+  hit: { flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.md },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',

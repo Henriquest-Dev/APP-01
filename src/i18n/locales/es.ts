@@ -325,4 +325,10 @@ export const es: Strings = {
   profileSaved: 'Perfil guardado',
   imageFailed: 'No se pudo subir la imagen. Inténtalo de nuevo.',
   coinUnavailable: 'No se pudo cargar el precio de esta moneda ahora. Inténtalo en un momento.',
+  searchAnyCoin: 'Buscar cualquier moneda',
+  historyTitle: 'Historial',
+  allCoins: 'Todas las monedas',
+  noCoinsFound: 'No se encontró ninguna moneda.',
+  hasCalls: 'Tiene calls de la comunidad',
+  searchOtherCoin: 'Buscar cualquier otra moneda',
 };

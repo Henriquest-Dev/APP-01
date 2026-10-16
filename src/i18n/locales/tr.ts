@@ -325,4 +325,10 @@ export const tr: Strings = {
   profileSaved: 'Profil kaydedildi',
   imageFailed: 'Görsel yüklenemedi. Tekrar dene.',
   coinUnavailable: 'Bu coinin fiyatı şu an yüklenemedi. Biraz sonra tekrar dene.',
+  searchAnyCoin: 'Herhangi bir coin ara',
+  historyTitle: 'Geçmiş',
+  allCoins: 'Tüm coinler',
+  noCoinsFound: 'Coin bulunamadı.',
+  hasCalls: 'Topluluk call’ları var',
+  searchOtherCoin: 'Başka bir coin ara',
 };

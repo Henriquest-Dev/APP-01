@@ -326,4 +326,10 @@ export const de: Strings = {
   profileSaved: 'Profil gespeichert',
   imageFailed: 'Bild konnte nicht hochgeladen werden. Versuch es erneut.',
   coinUnavailable: 'Der Preis dieser Münze konnte gerade nicht geladen werden. Versuch es gleich noch einmal.',
+  searchAnyCoin: 'Beliebige Münze suchen',
+  historyTitle: 'Verlauf',
+  allCoins: 'Alle Münzen',
+  noCoinsFound: 'Keine Münze gefunden.',
+  hasCalls: 'Hat Community-Calls',
+  searchOtherCoin: 'Beliebige andere Münze suchen',
 };

@@ -16,11 +16,14 @@ type Props = { coin: CatalogCoin; price?: number; change24h?: number; index?: nu
 
 /** A coin from the catalog: shows whether it is trending now, came back, or left the list. */
 export function CatalogRow({ coin, price, change24h, index = 0 }: Props) {
-  const status = coin.returned
-    ? strings.returnedTrending
-    : coin.trendingNow
-      ? strings.inTrending
-      : strings.leftTrending.replace('{ago}', formatAgo(coin.lastTrendingAt) || '1m');
+  const neverTrended = coin.lastTrendingAt < Date.UTC(2000, 0, 1);
+  const status = neverTrended
+    ? strings.hasCalls
+    : coin.returned
+      ? strings.returnedTrending
+      : coin.trendingNow
+        ? strings.inTrending
+        : strings.leftTrending.replace('{ago}', formatAgo(coin.lastTrendingAt) || '1m');
   const StatusIcon = coin.returned ? RotateCcw : coin.trendingNow ? Flame : null;
   const hot = coin.trendingNow;
 

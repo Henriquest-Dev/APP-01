@@ -326,4 +326,10 @@ export const pt: Strings = {
   profileSaved: 'Perfil guardado',
   imageFailed: 'Não foi possível enviar a imagem. Tenta outra vez.',
   coinUnavailable: 'Não foi possível carregar o preço desta moeda agora. Tenta daqui a pouco.',
+  searchAnyCoin: 'Procurar qualquer moeda',
+  historyTitle: 'Histórico',
+  allCoins: 'Todas as moedas',
+  noCoinsFound: 'Nenhuma moeda encontrada.',
+  hasCalls: 'Tem calls da comunidade',
+  searchOtherCoin: 'Procurar outra moeda qualquer',
 };

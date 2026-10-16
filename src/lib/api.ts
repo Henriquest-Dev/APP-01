@@ -78,11 +78,30 @@ export async function fetchChart(id: string, days: ChartRange): Promise<number[]
 export async function fetchMarketsByIds(ids: string[]): Promise<Coin[]> {
   const out: Coin[] = [];
   for (let i = 0; i < ids.length; i += 80) {
-    const chunk = ids.slice(i, i + 80).map(encodeURIComponent).join(',');
+    const chunk = ids
+      .slice(i, i + 80)
+      .map(encodeURIComponent)
+      .join(',');
     const rows = await get<any[]>(
       `/coins/markets?vs_currency=usd&ids=${chunk}&per_page=80&page=1&sparkline=true&price_change_percentage=24h`,
     );
     out.push(...rows.map(toCoin));
   }
   return out;
+}
+
+export type CoinHit = { id: string; symbol: string; name: string; image: string; rank: number | null };
+
+/** Searches every coin CoinGecko knows (thousands), by name or ticker. */
+export async function searchCoins(query: string): Promise<CoinHit[]> {
+  const q = query.trim();
+  if (q.length < 2) return [];
+  const data = await get<{ coins: any[] }>(`/search?query=${encodeURIComponent(q)}`);
+  return (data.coins ?? []).slice(0, 20).map((c) => ({
+    id: c.id,
+    symbol: String(c.symbol ?? '').toUpperCase(),
+    name: c.name,
+    image: c.large ?? c.thumb ?? '',
+    rank: c.market_cap_rank ?? null,
+  }));
 }

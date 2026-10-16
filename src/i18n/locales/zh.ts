@@ -322,4 +322,10 @@ export const zh: Strings = {
   profileSaved: '资料已保存',
   imageFailed: '图片上传失败，请重试。',
   coinUnavailable: '暂时无法加载该币种的价格，请稍后再试。',
+  searchAnyCoin: '搜索任意币种',
+  historyTitle: '历史',
+  allCoins: '所有币种',
+  noCoinsFound: '未找到币种。',
+  hasCalls: '有社区预测',
+  searchOtherCoin: '搜索其他任意币种',
 };

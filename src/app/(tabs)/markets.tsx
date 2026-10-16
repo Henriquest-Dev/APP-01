@@ -1,9 +1,11 @@
-import { useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { Search } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, StyleSheet, TextInput, View } from 'react-native';
 
 import { CatalogRow } from '@/components/catalog-row';
+import { CoinAvatar } from '@/components/coin-avatar';
+import { PressableScale } from '@/components/pressable-scale';
 import { CoinRow } from '@/components/coin-row';
 import { Glass } from '@/components/glass';
 import { Screen } from '@/components/screen';
@@ -12,13 +14,14 @@ import { Txt } from '@/components/text';
 import { strings } from '@/i18n';
 import { fetchMarketsByIds } from '@/lib/api';
 import { fetchCatalog, type CatalogCoin } from '@/lib/catalog';
-import { fetchServerPrices } from '@/lib/server-prices';
+import { useCoinSearch } from '@/hooks/use-coin-search';
+import { fetchCoinQuotes } from '@/lib/coin-lookup';
 import { isStablecoin, momentumScore } from '@/lib/momentum';
 import { useMarket } from '@/state/market';
 import { colors, fonts, radius, space } from '@/theme';
 
 type Tab = 'market' | 'catalog';
-type Quote = { price: number; change24h: number };
+type Quote = { price: number; change24h?: number };
 
 export default function Markets() {
   const { coins, trending } = useMarket();
@@ -38,16 +41,20 @@ export default function Markets() {
         const rows = await fetchCatalog().catch(() => [] as CatalogCoin[]);
         if (!alive) return;
         setCatalog(rows);
-        const found: Record<string, Quote> = {};
-        try {
-          for (const c of await fetchMarketsByIds(rows.slice(0, 160).map((r) => r.id)))
-            found[c.id] = { price: c.price, change24h: c.change24h };
-        } catch {
-          const bySymbol = await fetchServerPrices(rows.map((r) => r.symbol)).catch(
-            () => ({}) as Record<string, number>,
-          );
-          for (const r of rows)
-            if (bySymbol[r.symbol]) found[r.id] = { price: bySymbol[r.symbol], change24h: 0 };
+        // The Callout server already holds price + 24h change for trending coins and
+        // coins with calls; only the rest are asked from the public API (few, to stay
+        // under its rate limit).
+        const found: Record<string, Quote> = await fetchCoinQuotes(rows.map((r) => r.id)).catch(
+          () => ({}) as Record<string, Quote>,
+        );
+        const missing = rows.filter((r) => !found[r.id]).slice(0, 40);
+        if (missing.length) {
+          try {
+            for (const c of await fetchMarketsByIds(missing.map((r) => r.id)))
+              found[c.id] = { price: c.price, change24h: c.change24h };
+          } catch {
+            // price simply stays blank for those rows
+          }
         }
         if (alive) setQuotes(found);
       })();
@@ -56,6 +63,10 @@ export default function Markets() {
       };
     }, []),
   );
+
+  const remote = useCoinSearch(query);
+  const known = new Set([...coins.map((c) => c.id), ...(catalog ?? []).map((c) => c.id)]);
+  const remoteHits = remote.hits;
 
   const catalogList = (catalog ?? []).filter(
     (c) => !q || c.name.toLowerCase().includes(q) || c.symbol.toLowerCase().includes(q),
@@ -85,7 +96,7 @@ export default function Markets() {
         <TextInput
           value={query}
           onChangeText={setQuery}
-          placeholder={strings.searchPlaceholder}
+          placeholder={strings.searchAnyCoin}
           placeholderTextColor={colors.textFaint}
           selectionColor={colors.accent}
           style={styles.input}
@@ -100,22 +111,49 @@ export default function Markets() {
           </Txt>
           {catalog === null ? (
             <ActivityIndicator color={colors.accent} style={{ marginTop: space.xl }} />
-          ) : catalogList.length === 0 ? (
+          ) : catalogList.length === 0 && !q ? (
             <Txt size={14} color={colors.textMuted} style={[styles.hint, { textAlign: 'center' }]}>
               {strings.catalogEmpty}
             </Txt>
           ) : (
-            <Glass style={styles.card}>
-              {catalogList.map((c, i) => (
-                <CatalogRow
-                  key={c.id}
-                  coin={c}
-                  index={i}
-                  price={quotes[c.id]?.price}
-                  change24h={quotes[c.id]?.change24h}
-                />
-              ))}
-            </Glass>
+            <>
+              {catalogList.some((c) => c.trendingNow) ? (
+                <Glass style={styles.card}>
+                  <Txt size={16} weight="semibold" style={styles.cardTitle}>
+                    {strings.inTrending}
+                  </Txt>
+                  {catalogList
+                    .filter((c) => c.trendingNow)
+                    .map((c, i) => (
+                      <CatalogRow
+                        key={c.id}
+                        coin={c}
+                        index={i}
+                        price={quotes[c.id]?.price}
+                        change24h={quotes[c.id]?.change24h}
+                      />
+                    ))}
+                </Glass>
+              ) : null}
+              {catalogList.some((c) => !c.trendingNow) ? (
+                <Glass style={styles.card}>
+                  <Txt size={16} weight="semibold" style={styles.cardTitle}>
+                    {strings.historyTitle}
+                  </Txt>
+                  {catalogList
+                    .filter((c) => !c.trendingNow)
+                    .map((c, i) => (
+                      <CatalogRow
+                        key={c.id}
+                        coin={c}
+                        index={i}
+                        price={quotes[c.id]?.price}
+                        change24h={quotes[c.id]?.change24h}
+                      />
+                    ))}
+                </Glass>
+              ) : null}
+            </>
           )}
         </>
       ) : null}
@@ -141,11 +179,55 @@ export default function Markets() {
           ))}
         </Glass>
       ) : null}
+
+      {q.length >= 2 ? (
+        <Glass style={styles.card}>
+          <Txt size={16} weight="semibold" style={styles.cardTitle}>
+            {strings.allCoins}
+          </Txt>
+          {remote.loading ? (
+            <ActivityIndicator color={colors.accent} style={{ margin: space.lg }} />
+          ) : remoteHits.filter((h) => !known.has(h.id)).length === 0 ? (
+            <Txt size={13} color={colors.textMuted} style={{ padding: space.lg }}>
+              {remote.failed ? strings.coinUnavailable : strings.noCoinsFound}
+            </Txt>
+          ) : (
+            remoteHits
+              .filter((h) => !known.has(h.id))
+              .map((h) => (
+                <PressableScale
+                  key={h.id}
+                  accessibilityRole="button"
+                  scaleTo={0.98}
+                  onPress={() => router.push({ pathname: '/coin/[id]', params: { id: h.id } })}
+                  style={styles.hitRow}>
+                  <CoinAvatar uri={h.image} symbol={h.symbol} size={36} />
+                  <View style={{ flex: 1, gap: 2 }}>
+                    <Txt size={15} weight="semibold" numberOfLines={1}>
+                      {h.name}
+                    </Txt>
+                    <Txt size={12} color={colors.textMuted}>
+                      {h.symbol}
+                      {h.rank ? ` · #${h.rank}` : ''}
+                    </Txt>
+                  </View>
+                </PressableScale>
+              ))
+          )}
+        </Glass>
+      ) : null}
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
+  hitRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.md,
+    paddingHorizontal: space.lg,
+    paddingVertical: space.md,
+  },
   hint: { paddingHorizontal: space.lg, marginTop: space.lg },
   title: { paddingHorizontal: space.lg, marginBottom: space.lg },
   search: {

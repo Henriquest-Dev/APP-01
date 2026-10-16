@@ -323,6 +323,12 @@ export const en = {
   profileSaved: 'Profile saved',
   imageFailed: 'Could not upload the image. Try again.',
   coinUnavailable: 'Could not load this coin’s price right now. Try again in a moment.',
+  searchAnyCoin: 'Search any coin',
+  historyTitle: 'History',
+  allCoins: 'All coins',
+  noCoinsFound: 'No coin found.',
+  hasCalls: 'Has community calls',
+  searchOtherCoin: 'Search any other coin',
 };
 
 export type Strings = typeof en;

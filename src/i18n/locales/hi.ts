@@ -324,4 +324,10 @@ export const hi: Strings = {
   profileSaved: 'प्रोफ़ाइल सहेजी गई',
   imageFailed: 'तस्वीर अपलोड नहीं हो सकी। फिर कोशिश करें।',
   coinUnavailable: 'इस कॉइन की कीमत अभी लोड नहीं हो सकी। थोड़ी देर बाद फिर कोशिश करें।',
+  searchAnyCoin: 'कोई भी कॉइन खोजें',
+  historyTitle: 'इतिहास',
+  allCoins: 'सभी कॉइन',
+  noCoinsFound: 'कोई कॉइन नहीं मिला।',
+  hasCalls: 'कम्युनिटी कॉल हैं',
+  searchOtherCoin: 'कोई और कॉइन खोजें',
 };

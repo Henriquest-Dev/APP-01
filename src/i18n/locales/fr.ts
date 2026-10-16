@@ -328,4 +328,10 @@ export const fr: Strings = {
   profileSaved: 'Profil enregistré',
   imageFailed: 'Impossible d’envoyer l’image. Réessaie.',
   coinUnavailable: 'Impossible de charger le prix de cette crypto pour le moment. Réessaie dans un instant.',
+  searchAnyCoin: 'Chercher n’importe quelle crypto',
+  historyTitle: 'Historique',
+  allCoins: 'Toutes les cryptos',
+  noCoinsFound: 'Aucune crypto trouvée.',
+  hasCalls: 'A des calls de la communauté',
+  searchOtherCoin: 'Chercher une autre crypto',
 };

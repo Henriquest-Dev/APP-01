@@ -325,4 +325,10 @@ export const ru: Strings = {
   profileSaved: 'Профиль сохранён',
   imageFailed: 'Не удалось загрузить изображение. Попробуй ещё раз.',
   coinUnavailable: 'Сейчас не удалось загрузить цену этой монеты. Попробуй чуть позже.',
+  searchAnyCoin: 'Искать любую монету',
+  historyTitle: 'История',
+  allCoins: 'Все монеты',
+  noCoinsFound: 'Монета не найдена.',
+  hasCalls: 'Есть коллы сообщества',
+  searchOtherCoin: 'Найти другую монету',
 };
