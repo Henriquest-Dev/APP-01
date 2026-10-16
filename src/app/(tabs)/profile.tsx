@@ -23,7 +23,6 @@ import { fetchServerPrices } from '@/lib/server-prices';
 import { callStats } from '@/lib/stats';
 import { useCoinPrices } from '@/hooks/use-coin-prices';
 import { useCalls } from '@/state/calls';
-import { useMarket } from '@/state/market';
 import { usePro } from '@/state/pro';
 import { useSession } from '@/state/session';
 import { PressableScale } from '@/components/pressable-scale';
